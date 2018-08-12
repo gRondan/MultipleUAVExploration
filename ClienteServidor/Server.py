@@ -1,14 +1,15 @@
 import socket
 import threading
 
-bind_ip = '127.0.0.1'
-bind_port = 9999
+bind_ip = '172.16.138.130'
+bind_port = 5900
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind((bind_ip, bind_port))
+server.bind((bind_ip, 0))
 server.listen(5)  # max backlog of connections
-
-print ('Listening'.format(bind_ip, bind_port))
+addr = server.getsockname()
+print ('Listening: ' +str(addr[1]))
+#print ('Listening {}:{}'.format(bind_ip, ))
 
 
 def handle_client_connection(client_socket):
