@@ -3,6 +3,7 @@ import utils
 import math
 from random import randint
 from batteryEnum import LOW, CRITICAL, NORMAL
+import threading
 
 class drone:
     def __init__(self, home):
@@ -14,6 +15,7 @@ class drone:
         self.home = home
         self.current_position = home
         self.battery_status = NORMAL
+        self.mutex_search_map = threading.Lock()
         self.updateSearchMap(home)
 
     def explore(self):
@@ -29,18 +31,24 @@ class drone:
                 y3 = y+y2
                 if self.validatePosition(x3, y3):
                     if firstTime:
+                        self.mutex_search_map.acquire()
                         val = self.search_map[x3][y3]
+                        self.mutex_search_map.release()
                         x1 = x3
                         y1 = y3
                         firstTime = False
                     print("x3: "+str(x3)+ " y3: "+str(y3)+" self.mapa_ancho: "+str(self.mapa_ancho)+ " self.mapa_largo: "+ str(self.mapa_largo))
+                    self.mutex_search_map.acquire()
                     if self.search_map[x3][y3] < val:
                             x1, y1 = x3, y3
                             val = self.search_map[x3][y3]
+                    self.mutex_search_map.release()
         print("x: "+str(x1)+" y: "+str(y1))
         self.current_position = (x1,y1)
         self.updateSearchMap(self.current_position)
+        self.mutex_search_map.acquire()
         utils.printMatrix(self.search_map)
+        self.mutex_search_map.release()
 
     def validatePosition(self, x3, y3):
         condition = x3>=0 and y3>= 0 and x3<self.mapa_ancho and y3<self.mapa_largo
@@ -57,7 +65,9 @@ class drone:
         return math.sqrt((tuple2[1] - tuple1[1])**2 + (tuple2[0] - tuple1[0])**2)
 
     def updateSearchMap(self, tupla):
+        self.mutex_search_map.acquire()
         self.search_map[tupla[0]][tupla[1]] +=1
+        self.mutex_search_map.release()
 
     def getBatteryPercentage():
         return NORMAL
@@ -86,7 +96,9 @@ class drone:
         y1 = self.getNewCoordinate(1)
         self.current_position = (x1,y1)
         self.updateSearchMap(self.current_position)
+        self.mutex_search_map.acquire()
         utils.printMatrix(self.search_map)
+        self.mutex_search_map.release()
 
 
     def getNewCoordinate(self, pos):

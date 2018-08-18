@@ -4,6 +4,8 @@ import netifaces as ni
 import ipaddress
 import threading
 from subprocess import Popen, PIPE
+from flightplans import drone
+import utils
 
 #CONSTANTS
 port = properties.PORT
@@ -52,8 +54,8 @@ def run_server(ip, drone):
         print ('Received {}'.format(request))
         client_socket.send(str.encode('ACK!'))
         client_socket.close()
-        drone.updateSearchMap(utils.convertStringToTuple(request))
-        
+        drone.updateSearchMap(utils.convertStringToTuple(request.decode("utf-8")))
+
 
     while True:
         client_sock, address = server.accept()
