@@ -4,3 +4,19 @@ def printMatrix(matrix):
     fmt = '-'.join('{{:{}}}'.format(x) for x in lens)
     table = [fmt.format(*row) for row in s]
     print ('\n'.join(table))
+
+def convertTupleToString(tupla):
+    result = ""
+    cnt = 0
+    for i in tupla:
+        result += str(i)
+        if (cnt != len(tupla) -1):
+            result += ","
+        cnt += 1
+    return result
+
+def convertStringToTuple(message):
+    tupla = []
+    for i in message.split(","):
+        tupla.append(int(i))
+    return tuple(tupla)
