@@ -3,12 +3,17 @@ from flightplans import drone
 from batteryEnum import LOW, CRITICAL, NORMAL
 import time
 import utils
+import threading
 
-drone1 = drone.drone((0,0))
-drone2 = drone.drone((0,0))
+drone1 = drone.drone((23,31))
 
 my_ip = connections.get_server_ip()
-connections.run_server(my_ip, drone2)
+client_handler = threading.Thread(
+    target=connections.run_server,
+    args=(my_ip, drone1,)
+)
+client_handler.start()
+
 #result2= (23,31)
 #drone2.updateSearchMap(result)
 #drone1.updateSearchMap(result2)
