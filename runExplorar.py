@@ -6,7 +6,7 @@ import time
 import utils
 import threading
 
-drone1 = drone.drone((23,31))
+drone1 = drone.drone((0,0))
 
 my_ip = connections.get_server_ip()
 client_handler = threading.Thread(
@@ -16,11 +16,15 @@ client_handler = threading.Thread(
 client_handler.start()
 client = client.client()
 client.search_friends()
+
+drone1.take_off()
+
 #result2= (23,31)
 #drone2.updateSearchMap(result)
 #drone1.updateSearchMap(result2)
 for i in range(1000):
-    drone1.explore()
+    new_position = drone1.explore()
+    drone1.move(new_position)
     message = utils.convertTupleToString(drone1.current_position)
     client.send_message(message)
 
