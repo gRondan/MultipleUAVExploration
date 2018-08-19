@@ -1,12 +1,13 @@
 from connections import connections
 from connections import client
-from flightplans import drone
+from flightplans import drone, droneTest
 from batteryEnum import LOW, CRITICAL, NORMAL
 import time
 import utils
 import threading
 
-drone1 = drone.drone((0,0))
+#drone1 = drone.drone((0,0))
+drone1 = droneTest.droneTest((23,31))
 
 my_ip = connections.get_server_ip()
 client_handler = threading.Thread(
@@ -22,7 +23,7 @@ drone1.take_off()
 #result2= (23,31)
 #drone2.updateSearchMap(result)
 #drone1.updateSearchMap(result2)
-for i in range(1000):
+for i in range(4000):
     new_position = drone1.explore()
     drone1.move(new_position)
     message = utils.convertTupleToString(drone1.current_position)

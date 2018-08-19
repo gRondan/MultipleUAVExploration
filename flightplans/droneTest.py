@@ -7,7 +7,7 @@ import threading
 from pyparrot.Bebop import Bebop
 import random
 
-class drone:
+class droneTest:
     def __init__(self, home):
         self.rango_largo = properties.RANGO_LARGO
         self.rango_ancho = properties.RANGO_ANCHO
@@ -23,22 +23,24 @@ class drone:
 
     def initialize(self):
         self.search_map[self.home[0]][self.home[1]] = 1
-        success = self.bebop.connect(10)
-        print(success)
-        self.bebop.ask_for_state_update()
+        #success = self.bebop.connect(10)
+        #print(success)
+        #self.bebop.ask_for_state_update()
 
     def take_off(self):
-        self.bebop.safe_takeoff(10)
+        #self.bebop.safe_takeoff(10)
+        print("take_off")
 
     def land(self):
-        self.bebop.safe_land(10)
+        print("land")
+        #self.bebop.safe_land(10)
 
     def move(self, new_position):
         dx, dy = new_position[0] - self.current_position[0], new_position[1] - self.current_position[1]
         real_dx, real_dy = dx*self.rango_ancho, dy*self.rango_largo
-        self.bebop.move_relative(real_dx, real_dy, 0, 0)
-        time.sleep(2)
-        self.current_position = (x1,y1)
+        #self.bebop.move_relative(real_dx, real_dy, 0, 0)
+        #time.sleep(2)
+        self.current_position = new_position
         self.updateSearchMap(self.current_position)
         self.mutex_search_map.acquire()
         utils.printMatrix(self.search_map)
@@ -66,9 +68,13 @@ class drone:
                         firstTime = False
                     print("x3: "+str(x3)+ " y3: "+str(y3)+" self.mapa_ancho: "+str(self.mapa_ancho)+ " self.mapa_largo: "+ str(self.mapa_largo))
                     self.mutex_search_map.acquire()
-                    if (self.search_map[x3][y3] < val):
-                            best_values.append((x3, y3))
-                            val = self.search_map[x3][y3]
+                    if (self.search_map[x3][y3] == val):
+                        best_values.append((x3, y3))
+                        val = self.search_map[x3][y3]
+                    elif self.search_map[x3][y3] < val:
+                        best_values = []
+                        best_values.append((x3, y3))
+                        val = self.search_map[x3][y3]
                     self.mutex_search_map.release()
         selected = self.selectBestValue(best_values)
         print("x: "+str(selected[0])+" y: "+str(selected[1]))
@@ -77,8 +83,11 @@ class drone:
 
     def selectBestValue(self, best_values):
         lenght = len(best_values)
-        selected = random.randint(-1, lenght-1)
-        return best_values[selected]
+        if(lenght == 1):
+            return best_values[0]
+        else:
+            selected = random.randint(0, lenght-1)
+            return best_values[selected]
 
     def validatePosition(self, x3, y3):
         condition = x3>=0 and y3>= 0 and x3<self.mapa_ancho and y3<self.mapa_largo
