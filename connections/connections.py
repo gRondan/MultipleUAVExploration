@@ -67,6 +67,14 @@ def run_server(ip, drone):
         client_handler.start()
 
 def send_message(msj):
+    handler = threading.Thread(
+        target=send_message_thread,
+        args=(msj,)
+    )
+    handler.start()
+
+
+def send_message_thread(msj):
     network = ipaddress.ip_network(ip_address)
     for i in network.hosts():
     	i = str(i)
