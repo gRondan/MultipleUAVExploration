@@ -30,17 +30,18 @@ class client:
         return toping.returncode
 
 
-    def search_friends(self):
+    def search_friends(self, my_ip):
         for i in self.network.hosts():
             i = str(i)
-            toping = Popen(['ping', '-c', '1', '-w', ping_timeout, i], stdout=PIPE)
-            output = toping.communicate()[0]
-            hostalive = toping.returncode
-            if hostalive == 0:
-                print(i, 'IS REACHABLE')
-                self.friends.append(i)
-            else:
-                print(i, 'is unreachable')
+            if(i != my_ip):
+                toping = Popen(['ping', '-c', '1', '-w', ping_timeout, i], stdout=PIPE)
+                output = toping.communicate()[0]
+                hostalive = toping.returncode
+                if hostalive == 0:
+                    print(i, 'IS REACHABLE')
+                    self.friends.append(i)
+                else:
+                    print(i, 'is unreachable')
 
     def client_request(self, ip_address, msj):
         try:
@@ -64,7 +65,7 @@ class client:
                 else:
                     print(ip, 'no se encontro el dron')
                     handler = threading.Thread(
-                        target=reconect,
+                        target=self.reconect,
                         args=(msj,ip)
                     )
                     handler.start()

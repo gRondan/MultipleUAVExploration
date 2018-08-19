@@ -6,6 +6,7 @@ from batteryEnum import LOW, CRITICAL, NORMAL
 import threading
 from pyparrot.Bebop import Bebop
 import random
+import time
 
 class droneTest:
     def __init__(self, home):
@@ -39,7 +40,7 @@ class droneTest:
         dx, dy = new_position[0] - self.current_position[0], new_position[1] - self.current_position[1]
         real_dx, real_dy = dx*self.rango_ancho, dy*self.rango_largo
         #self.bebop.move_relative(real_dx, real_dy, 0, 0)
-        #time.sleep(2)
+        time.sleep(5)
         self.current_position = new_position
         self.updateSearchMap(self.current_position)
         self.mutex_search_map.acquire()
