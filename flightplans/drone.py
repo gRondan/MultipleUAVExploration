@@ -4,6 +4,7 @@ import math
 from random import randint
 from batteryEnum import LOW, CRITICAL, NORMAL
 import threading
+from pyparrot.Bebop import Bebop
 
 class drone:
     def __init__(self, home):
@@ -16,7 +17,31 @@ class drone:
         self.current_position = home
         self.battery_status = NORMAL
         self.mutex_search_map = threading.Lock()
-        self.updateSearchMap(home)
+        self.bebop = Bebop()
+        self.initialize()
+
+    def initialize(self):
+        self.search_map[self.home[0]][self.home[1]] = 1
+        success = self.bebop.connect(10)
+        print(success)
+        self.bebop.ask_for_state_update()
+
+    def take_off(self):
+        self.bebop.safe_takeoff(10)
+
+    def land(self):
+        self.bebop.safe_land(10)
+
+    def move(self, new_position):
+        dx, dy = new_position[0] - self.current_position[0], new_position[1] - self.current_position[1]
+        real_dx, real_dy = dx*self.rango_ancho, dy*self.rango_largo
+        self.bebop.move_relative(real_dx, real_dy, 0, 0)
+        time.sleep(2)
+        self.current_position = (x1,y1)
+        self.updateSearchMap(self.current_position)
+        self.mutex_search_map.acquire()
+        utils.printMatrix(self.search_map)
+        self.mutex_search_map.release()
 
     def explore(self):
 
@@ -44,11 +69,7 @@ class drone:
                             val = self.search_map[x3][y3]
                     self.mutex_search_map.release()
         print("x: "+str(x1)+" y: "+str(y1))
-        self.current_position = (x1,y1)
-        self.updateSearchMap(self.current_position)
-        self.mutex_search_map.acquire()
-        utils.printMatrix(self.search_map)
-        self.mutex_search_map.release()
+        return (x1, y1)
 
     def validatePosition(self, x3, y3):
         condition = x3>=0 and y3>= 0 and x3<self.mapa_ancho and y3<self.mapa_largo
