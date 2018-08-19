@@ -66,9 +66,13 @@ class drone:
                         firstTime = False
                     print("x3: "+str(x3)+ " y3: "+str(y3)+" self.mapa_ancho: "+str(self.mapa_ancho)+ " self.mapa_largo: "+ str(self.mapa_largo))
                     self.mutex_search_map.acquire()
-                    if (self.search_map[x3][y3] < val):
-                            best_values.append((x3, y3))
-                            val = self.search_map[x3][y3]
+                    if (self.search_map[x3][y3] == val):
+                        best_values.append((x3, y3))
+                        val = self.search_map[x3][y3]
+                    elif self.search_map[x3][y3] < val:
+                        best_values = []
+                        best_values.append((x3, y3))
+                        val = self.search_map[x3][y3]
                     self.mutex_search_map.release()
         selected = self.selectBestValue(best_values)
         print("x: "+str(selected[0])+" y: "+str(selected[1]))
@@ -77,9 +81,12 @@ class drone:
 
     def selectBestValue(self, best_values):
         lenght = len(best_values)
-        selected = random.randint(-1, lenght-1)
-        return best_values[selected]
-
+        if(lenght == 1):
+            return best_values[0]
+        else:
+            selected = random.randint(0, lenght-1)
+            return best_values[selected]
+            
     def validatePosition(self, x3, y3):
         condition = x3>=0 and y3>= 0 and x3<self.mapa_ancho and y3<self.mapa_largo
         if self.battery_status == NORMAL:
