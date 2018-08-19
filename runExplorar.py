@@ -16,7 +16,7 @@ client_handler = threading.Thread(
 )
 client_handler.start()
 client = client.client()
-client.search_friends()
+client.search_friends(my_ip)
 
 drone1.take_off()
 
