@@ -34,7 +34,7 @@ class droneTest:
 
     def land(self):
         print("land")
-        #self.bebop.safe_land(10)
+        # self.bebop.safe_land(10)
 
     def move(self, new_position):
         dx, dy = new_position[0] - self.current_position[0], new_position[1] - self.current_position[1]

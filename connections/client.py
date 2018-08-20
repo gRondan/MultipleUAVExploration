@@ -31,6 +31,7 @@ class client:
 
 
     def search_friends(self, my_ip):
+        time.sleep(5)
         for i in self.network.hosts():
             i = str(i)
             if(i != my_ip):

@@ -6,6 +6,7 @@ from batteryEnum import LOW, CRITICAL, NORMAL
 import threading
 from pyparrot.Bebop import Bebop
 import random
+import time
 
 class drone:
     def __init__(self, home):
@@ -38,7 +39,7 @@ class drone:
         real_dx, real_dy = dx*self.rango_ancho, dy*self.rango_largo
         self.bebop.move_relative(real_dx, real_dy, 0, 0)
         time.sleep(2)
-        self.current_position = (x1,y1)
+        self.current_position = new_position
         self.updateSearchMap(self.current_position)
         self.mutex_search_map.acquire()
         utils.printMatrix(self.search_map)
@@ -86,7 +87,7 @@ class drone:
         else:
             selected = random.randint(0, lenght-1)
             return best_values[selected]
-            
+
     def validatePosition(self, x3, y3):
         condition = x3>=0 and y3>= 0 and x3<self.mapa_ancho and y3<self.mapa_largo
         if self.battery_status == NORMAL:
