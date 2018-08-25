@@ -1,5 +1,4 @@
 from stateMachine.statesEnum import ATERRIZAR
-from pyparrot.Bebop import Bebop
 
 class misionFinalizada():
     def __init__(self, bebop, dataBuffer, previousState):
