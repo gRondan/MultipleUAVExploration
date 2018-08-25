@@ -20,3 +20,6 @@ def convertStringToTuple(message):
     for i in message.split(","):
         tupla.append(int(i))
     return tuple(tupla)
+
+def createMessage(state, message_type, message_content):
+    return dict({"state":state, "message_type":message_type, "content":message_content})
