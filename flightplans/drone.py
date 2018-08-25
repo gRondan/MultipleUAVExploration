@@ -45,7 +45,7 @@ class drone:
         utils.printMatrix(self.search_map)
         self.mutex_search_map.release()
 
-    def explore(self):
+    def explore(self, poi_position):
 
         #self.updateSearchMap(self.current_position)
         exitloop = False
@@ -57,7 +57,7 @@ class drone:
             for x2 in range(-1,2):
                 x3 = x+x2
                 y3 = y+y2
-                if self.validatePosition(x3, y3):
+                if self.validatePosition(x3, y3, poi_position):
                     if firstTime:
                         self.mutex_search_map.acquire()
                         val = self.search_map[x3][y3]
@@ -88,9 +88,14 @@ class drone:
             selected = random.randint(0, lenght-1)
             return best_values[selected]
 
-    def validatePosition(self, x3, y3):
+    def validatePosition(self, x3, y3, poi_position):
         condition = x3>=0 and y3>= 0 and x3<self.mapa_ancho and y3<self.mapa_largo
-        if self.battery_status == NORMAL:
+        if poi_position != None:
+            tupla = (x3,y3)
+            distance2 = self.calculateDistance(poi_position, self.current_position)
+            distance1 = self.calculateDistance(poi_position, tupla)
+            return (condition and ( distance1 < distance2 ))
+        elif self.battery_status == NORMAL:
             return condition
         else:
             tupla = (x3,y3)
