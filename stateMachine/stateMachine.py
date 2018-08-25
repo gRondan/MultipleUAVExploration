@@ -5,7 +5,14 @@ from stateMachine.states import actualizarMapa, asignarPOI, aterrizar, bateriaBa
 cancelarMision, chequearStatus, despegar, desplazarse, enviarMensajes, explorar, fin, inicio,
 misionFinalizada, POICritico, POIVigilar, sinConexion
 
+from pyparrot.Bebop import Bebop
+from flightplans import drone, droneTest
+
+bebop = drone.drone((0,0))
+dataBuffer = None
+
 end = False
+previousState = None
 currentState = INICIO
 while !end:
     if currentState == INICIO:
@@ -22,6 +29,8 @@ while !end:
     elif currentState == EXPLORAR:
         print("currentState: "+str(currentState))
         explorarState = explorar()
+        dataBuffer = explorarState.execute()
+
         currentState = explorarState.getNextState()
     elif currentState == ASIGNAR_POI:
         print("currentState: "+str(currentState))
@@ -40,7 +49,8 @@ while !end:
         currentState = bateriaCriticaState.getNextState()
     elif currentState == DESPLAZARSE:
         print("currentState: "+str(currentState))
-        desplazarseState = desplazarse()
+        desplazarseState = desplazarse(previousState, bebop, dataBuffer)
+        desplazarseState.execute()
 
         currentState = desplazarseState.getNextState()
     elif currentState == ACTUALIZAR_MAPA:
