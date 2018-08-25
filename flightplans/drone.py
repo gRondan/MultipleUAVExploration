@@ -24,6 +24,7 @@ class drone:
     def initialize(self, home):
         self.search_map[self.home[0]][self.home[1]] = 1
         self.home = home
+        self.poi_position = None
         success = self.bebop.connect(10)
         print(success)
         self.bebop.ask_for_state_update()
@@ -45,7 +46,10 @@ class drone:
         utils.printMatrix(self.search_map)
         self.mutex_search_map.release()
 
-    def explore(self, poi_position):
+    def setPoiPosition(self, poiPosition):
+        self.poi_position = poiPosition
+
+    def explore(self):
 
         #self.updateSearchMap(self.current_position)
         exitloop = False
@@ -57,7 +61,7 @@ class drone:
             for x2 in range(-1,2):
                 x3 = x+x2
                 y3 = y+y2
-                if self.validatePosition(x3, y3, poi_position):
+                if self.validatePosition(x3, y3):
                     if firstTime:
                         self.mutex_search_map.acquire()
                         val = self.search_map[x3][y3]
@@ -88,12 +92,12 @@ class drone:
             selected = random.randint(0, lenght-1)
             return best_values[selected]
 
-    def validatePosition(self, x3, y3, poi_position):
+    def validatePosition(self, x3, y3):
         condition = x3>=0 and y3>= 0 and x3<self.mapa_ancho and y3<self.mapa_largo
-        if poi_position != None:
+        if self.poi_position != None:
             tupla = (x3,y3)
-            distance2 = self.calculateDistance(poi_position, self.current_position)
-            distance1 = self.calculateDistance(poi_position, tupla)
+            distance2 = self.calculateDistance(self.poi_position, self.current_position)
+            distance1 = self.calculateDistance(self.poi_position, tupla)
             return (condition and ( distance1 < distance2 ))
         elif self.battery_status == NORMAL:
             return condition
