@@ -1,10 +1,9 @@
-from stateMachine.states import ATERRIZAR, CANCELAR_MISION
+from stateMachine.states import ATERRIZAR, CANCELAR_MISION, DESPLAZARSE_SIN_CONEXION, BATERIA_CRITICA, BATERIA_BAJA
 from batteryEnum import LOW, CRITICAL, NORMAL
 
 class sinConexion():
     def __init__(self, bebop, dataBuffer, previousState, client):
         self.bebop = bebop
-        self.dataBuffer = dataBuffer
         self.previousState = previousState
         self.client = client
         cont = self.client.check_friends()
@@ -24,7 +23,4 @@ class sinConexion():
                 return BATERIA_BAJA
 
     def execute(self):
-        if not self.isConnected:
-            return None
-        else:
-            return self.client
+        return self.client
