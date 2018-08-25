@@ -140,3 +140,6 @@ class drone:
         elif self.current_position[pos] > self.home[pos]:
             x1 = self.current_position[pos]-1
         return x1
+
+    def disconnect():
+        self.bebop.disconnect()

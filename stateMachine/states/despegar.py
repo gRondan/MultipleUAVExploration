@@ -1,16 +1,22 @@
 from stateMachine.statesEnum import ASIGNAR_POI, EXPLORAR, BATERIA_BAJA, BATERIA_CRITICA
+from batteryEnum import LOW, CRITICAL, NORMAL
+from flightplans import drone
 
 class despegar():
-    def __init__(self):
+    def __init__(self, bebop,isAsignarPOI, previousState):
+        self.isAsignarPOI = isAsignarPOI
+        self.bebop = bebop
 
     def getNextState():
-        if despegarTransitions.isAsignarPOI():
-            actualState = ASIGNAR_POI
-        elif despegarTransitions.isExplorar():
-            actualState = EXPLORAR
-        elif despegarTransitions.isBateriaBaja():
-            actualState = BATERIA_BAJA
-        elif despegarTransitions.isBateriaCritica():
-            actualState = BATERIA_CRITICA
+        nextState = None
+        if self.isAsignarPOI:
+            nextState = ASIGNAR_POI
+        elif self.bebop.checkBatteryStatus == LOW:
+            nextState = BATERIA_CRITICA
+        else:
+            nextState = EXPLORAR
+        return nextState
 
-    def
+    def execute():
+        bebop.take_off()
+        return None
