@@ -1,6 +1,14 @@
-class bateriaCritica():
-    def __init__(self):
-        self.nextState = ATERRIZAR
+from stateMachine.statesEnum import ATERRIZAR
 
-    def getNextState():
+class bateriaCritica():
+    def __init__(self, bebop, dataBuffer, previousState):
+        self.nextState = ATERRIZAR
+        self.bebop = bebop
+        self.dataBuffer = dataBuffer
+
+    def getNextState(self):
         return ATERRIZAR
+
+    def execute(self):
+        self.bebop.goHome()
+        return None

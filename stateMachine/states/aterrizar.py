@@ -1,9 +1,13 @@
 class aterrizar():
-    def __init__(self):
+    def __init__(self, bebop, dataBuffer, previousState):
+        self.bebop = bebop
+        self.previousState = previousState
+        self.dataBuffer = dataBuffer
 
     def getNextState():
+        if self.previousState == DESPLAZARSE:
+            return DESPEGAR
+        return CARGAR
 
-        if aterrizarTransitions.isDespegar():
-            actualState = DESPEGAR
-        elif aterrizarTransitions.isFin():
-            actualState = FIN
+    def execute():
+        self.bebop.land()
