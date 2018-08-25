@@ -6,8 +6,8 @@ class explorar():
         self.bebop = bebop
         self.dataBuffer = dataBuffer
 
-    def getNextState():
+    def getNextState(self):
         return self.nextState
 
-    def execute():
+    def execute(self):
         return self.bebop.explore(None)

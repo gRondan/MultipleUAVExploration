@@ -96,7 +96,7 @@ class stateMachine():
 
                 # currentState = cancelarMisionState.getNextState()
             elif currentState == SIN_CONEXION:
-                self.state = sinConexion()
+                self.state = sinConexion(self.bebop, self.dataBuffer, self.previousState, self.client)
 
                 # currentState = sinConexionState.getNextState()
             elif currentState == FIN:

@@ -6,7 +6,7 @@ class desplazarse():
         self.bebop = bebop
         self.new_position = dataBuffer
 
-    def getNextState():
+    def getNextState(self):
         if (self.previousState == BATERIA_BAJA or self.previousState == BATERIA_CRITICA) and self.bebop.home == self.bebop.current_position:
             return ATERRIZAR
         elif desplazarseTrTransitions.isAterrizar():
@@ -14,4 +14,4 @@ class desplazarse():
 
     def execute(self):
         self.bebop.move(self.new_position)
-        return self.new_position
+        return self.previousState
