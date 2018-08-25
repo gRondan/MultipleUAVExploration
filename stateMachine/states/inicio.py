@@ -5,7 +5,7 @@ from connections import client
 import threading
 
 class inicio():
-    def __init__(self, bebop, home):
+    def __init__(self, bebop, home, previousState):
         self.nextState = DESPEGAR
         self.bebop = bebop
         self.home = home
@@ -16,6 +16,7 @@ class inicio():
     def execute(self):
         self.bebop.initialize(self.home)
         self.processConections()
+        return None
 
     def processConections(self):
         my_ip = connections.get_server_ip()
