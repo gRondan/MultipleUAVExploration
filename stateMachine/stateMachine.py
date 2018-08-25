@@ -4,91 +4,109 @@ CHEQUEAR_STATUS_MISION, ATERRIZAR, MISION_FINALIZADA, SIN_CONEXION, CANCELAR_MIS
 from stateMachine.states import actualizarMapa, asignarPOI, aterrizar, bateriaBaja, bateriaCritica,
 cancelarMision, chequearStatus, despegar, desplazarse, enviarMensajes, explorar, fin, inicio,
 misionFinalizada, POICritico, POIVigilar, sinConexion
+from pyparrot.Bebop import Bebop
+from flightplans import drone, droneTest
 
-end = False
-currentState = INICIO
-while !end:
-    if currentState == INICIO:
-        print("currentState: "+str(currentState))
-        inicioState = inicio()
+class stateMachine():
 
-        currentState = inicioState.getNextState():
-    elif currentState == DESPEGAR:
-        print("currentState: "+str(currentState))
-        despegarState = despegar()
+    def __init__(self, isInitPOICritico,  isInitPOIVigilar):
+        self.isInitPOICritico = isInitPOICritico
+        self.isInitPOIVigilar = isInitPOIVigilar
+        self.dataBuffer = None
+        self.state = None
+        self.end = False
+        self.currentState = INICIO
 
-        currentState = despegarState.getNextState()
+    def execute(self):
+        while !end:
+            if self.currentState == INICIO:
+                print("currentState: "+str(currentState))
+                self.state = inicio(bebop, home)
+                # inicioState.execute()
+                # currentState = inicioState.getNextState()
+            elif currentState == DESPEGAR:
+                print("currentState: "+str(currentState))
+                self.state = despegar()
+                # despegarState.execute()
+                # currentState = despegarState.getNextState()
 
-    elif currentState == EXPLORAR:
-        print("currentState: "+str(currentState))
-        explorarState = explorar()
-        currentState = explorarState.getNextState()
-    elif currentState == ASIGNAR_POI:
-        print("currentState: "+str(currentState))
-        asignarPOIState = asignarPOI()
+            elif currentState == EXPLORAR:
+                print("currentState: "+str(currentState))
+                self.state = explorar()
+                # previousState = currentState;
+                # currentState = explorarState.getNextState()
+            elif currentState == ASIGNAR_POI:
+                print("currentState: "+str(currentState))
+                self.state = asignarPOI()
 
-        currentState = asignarPOIState.getNextState()
-    elif currentState == BATERIA_BAJA:
-        print("currentState: "+str(currentState))
-        bateriaBajaState = bateriaBaja()
+                # currentState = asignarPOIState.getNextState()
+            elif currentState == BATERIA_BAJA:
+                print("currentState: "+str(currentState))
+                self.state = bateriaBaja()
 
-        currentState = bateriaBajaState.getNextState()
-    elif currentState == BATERIA_CRITICA:
-        print("currentState: "+str(currentState))
-        bateriaCriticaState = bateriaCritica()
+                # currentState = bateriaBajaState.getNextState()
+            elif currentState == BATERIA_CRITICA:
+                print("currentState: "+str(currentState))
+                self.state = bateriaCritica()
 
-        currentState = bateriaCriticaState.getNextState()
-    elif currentState == DESPLAZARSE:
-        print("currentState: "+str(currentState))
-        desplazarseState = desplazarse()
+                # currentState = bateriaCriticaState.getNextState()
+            elif currentState == DESPLAZARSE:
+                print("currentState: "+str(currentState))
+                self.state = desplazarse(bebop, previousState)
+                # desplazarseState.execute()
+                # currentState = desplazarseState.getNextState()
+            elif currentState == ACTUALIZAR_MAPA:
+                print("currentState: "+str(currentState))
+                self.state = actualizarMapa()
 
-        currentState = desplazarseState.getNextState()
-    elif currentState == ACTUALIZAR_MAPA:
-        print("currentState: "+str(currentState))
-        actualizarMapaState = actualizarMapa()
+                # currentState = actualizarMapaState.getNextState()
+            elif currentState == ENVIAR_MENSAJES:
+                print("currentState: "+str(currentState))
+                self.state = enviarMensajes()
 
-        currentState = actualizarMapaState.getNextState()
-    elif currentState == ENVIAR_MENSAJES:
-        print("currentState: "+str(currentState))
-        enviarMensajesState = enviarMensajes()
+                # currentState = enviarMensajesState.getNextState()
+            elif currentState == POI_VIGILAR:
+                print("currentState: "+str(currentState))
+                self.state = POIVigilar()
 
-        currentState = enviarMensajesState.getNextState()
-    elif currentState == POI_VIGILAR:
-        print("currentState: "+str(currentState))
-        POIVigilarState = POIVigilar()
+                # currentState = POIVigilarState.getNextState()
+            elif currentState == POI_CRITICO:
+                print("currentState: "+str(currentState))
+                self.state = POICritico()
 
-        currentState = POIVigilarState.getNextState()
-    elif currentState == POI_CRITICO:
-        print("currentState: "+str(currentState))
-        POICriticoState = POICritico()
+                # currentState = POICriticoState.getNextState()
+            elif currentState == CHEQUEAR_STATUS_MISION:
+                print("currentState: "+str(currentState))
+                self.state = chequearStatus()
 
-        currentState = POICriticoState.getNextState()
-    elif currentState == CHEQUEAR_STATUS_MISION:
-        print("currentState: "+str(currentState))
-        chequearStatusState = chequearStatus()
+                # currentState = chequearStatusState.getNextState()
+            elif currentState == ATERRIZAR:
+                print("currentState: "+str(currentState))
+                self.state = aterrizar()
 
-        currentState = chequearStatusState.getNextState()
-    elif currentState == ATERRIZAR:
-        print("currentState: "+str(currentState))
-        aterrizarState = aterrizar()
+                # currentState = aterrizarState.getNextState()
+            elif currentState == MISION_FINALIZADA:
+                print("currentState: "+str(currentState))
+                self.state = misionFinalizada()
 
-        currentState = aterrizarState.getNextState()
-    elif currentState == MISION_FINALIZADA:
-        print("currentState: "+str(currentState))
-        misionFinalizadaState = misionFinalizada()
+                # currentState = misionFinalizadaState.getNextState()
+            elif currentState == CANCELAR_MISION:
+                print("currentState: "+str(currentState))
+                self.state = cancelarMision()
 
-        currentState = misionFinalizadaState.getNextState()
-    elif currentState == CANCELAR_MISION:
-        print("currentState: "+str(currentState))
-        cancelarMisionState = cancelarMision()
+                # currentState = cancelarMisionState.getNextState()
+            elif currentState == SIN_CONEXION:
+                print("currentState: "+str(currentState))
+                self.state = sinConexion()
 
-        currentState = cancelarMisionState.getNextState()
-    elif currentState == SIN_CONEXION:
-        print("currentState: "+str(currentState))
-        sinConexionState = sinConexion()
+                # currentState = sinConexionState.getNextState()
+            elif currentState == FIN:
+                print("currentState: "+str(currentState))
+                self.state = fin()
+                self.end = True
+            self.processState()
 
-        currentState = sinConexionState.getNextState()
-    elif currentState == FIN:
-        print("currentState: "+str(currentState))
-        finState = fin()
-        end = True
+    def processState(self):
+        self.dataBuffer = self.state.execute()
+        self.previousState = self.currentState
+        self.currentState = self.state.getNextState()
