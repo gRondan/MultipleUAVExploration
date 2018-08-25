@@ -12,4 +12,4 @@ class actualizarMapa():
 
     def execute(self):
         self.bebop.updateSearchMap(self.bebop.current_position)
-        return dataBuffer
+        return self.dataBuffer
