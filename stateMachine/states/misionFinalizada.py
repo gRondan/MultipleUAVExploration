@@ -10,5 +10,5 @@ class misionFinalizada():
         return self.nextState
         
     def execute(self):
-        self.bebop.move(self.bebop.home)
+        self.bebop.goHome()
         return None
