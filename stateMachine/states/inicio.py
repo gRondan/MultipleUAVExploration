@@ -15,8 +15,7 @@ class inicio():
 
     def execute(self):
         self.bebop.initialize(self.home)
-        self.processConections()
-        return None
+        return self.processConections()
 
     def processConections(self):
         my_ip = connections.get_server_ip()
