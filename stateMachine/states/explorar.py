@@ -10,4 +10,4 @@ class explorar():
         return self.nextState
 
     def execute():
-        return self.bebop.explorar()
+        return self.bebop.explore()
