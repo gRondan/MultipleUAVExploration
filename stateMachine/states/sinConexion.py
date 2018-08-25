@@ -15,9 +15,7 @@ class sinConexion():
         while self.bebop.current_position != self.bebop.home and disconnected:
             new_coordinate = self.bebop.getNewCoordinate()
             self.bebop.move(new_coordinate)
-            for ip in self.client.friends:
-                status = self.bebop.check_connection(ip)
-                if status == 0:
-                    disconnected = False
-                    break
+            cont = self.client.check_friends()
+            if cont > 0:
+                disconnected = False
         return None

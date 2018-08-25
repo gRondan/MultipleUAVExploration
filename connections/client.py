@@ -29,6 +29,13 @@ class client:
         output = toping.communicate()[0]
         return toping.returncode
 
+    def check_friends(self):
+        cont = 0
+        for ip in self.friends:
+            status = self.check_connection(ip)
+            if status == 0:
+                cont += 1
+        return cont
 
     def search_friends(self, my_ip):
         time.sleep(5)
