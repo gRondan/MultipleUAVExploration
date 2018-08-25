@@ -9,16 +9,16 @@ import random
 import time
 
 class drone:
-    def __init__(self):
+    def __init__(self, ip):
         self.rango_largo = properties.RANGO_LARGO
         self.rango_ancho = properties.RANGO_ANCHO
         self.mapa_largo = properties.MAPA_LARGO/self.rango_largo
         self.mapa_ancho = properties.MAPA_ANCHO/self.rango_ancho
+        self.ip = ip
         self.search_map = [[0 for j in range(int(self.mapa_largo))]for i in range(int(self.mapa_ancho))]
         self.current_position = home
         self.mutex_search_map = threading.Lock()
         self.bebop = Bebop()
-        self.initialize()
 
     def initialize(self, home):
         self.search_map[self.home[0]][self.home[1]] = 1

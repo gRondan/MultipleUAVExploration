@@ -26,7 +26,7 @@ class stateMachine():
     def execute(self):
         endExecutionTimer = Timer(TIMEOUT, self.isEndMision)
         endExecutionTimer.start()
-        while !self.end:
+        while not self.end:
             print("currentState: "+str(self.currentState))
             if self.currentState == INICIO:
                 self.state = inicio(self.bebop, self.dataBuffer, self.previousState)
@@ -63,7 +63,7 @@ class stateMachine():
                 # desplazarseState.execute()
                 # currentState = desplazarseState.getNextState()
             elif currentState == ACTUALIZAR_MAPA:
-                self.state = actualizarMapa(self.bebop, self.dataBuffer, self.previousState)
+                self.state = actualizarMapa(self.bebop, self.dataBuffer, self.previousState, self.timerDrones)
 
                 # currentState = actualizarMapaState.getNextState()
             elif currentState == ENVIAR_MENSAJES:
