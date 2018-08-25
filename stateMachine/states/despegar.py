@@ -7,7 +7,7 @@ class despegar():
         self.isAsignarPOI = isAsignarPOI
         self.bebop = bebop
 
-    def getNextState():
+    def getNextState(self):
         nextState = None
         if self.isAsignarPOI:
             nextState = ASIGNAR_POI
@@ -17,6 +17,6 @@ class despegar():
             nextState = EXPLORAR
         return nextState
 
-    def execute():
+    def execute(self):
         bebop.take_off()
         return None

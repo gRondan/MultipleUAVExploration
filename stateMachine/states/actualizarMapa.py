@@ -7,9 +7,9 @@ class actualizarMapa():
         self.dataBuffer = dataBuffer
         self.previousState = previousState
 
-    def getNextState():
+    def getNextState(self):
         return self.nextState
 
-    def execute():
+    def execute(self):
         self.bebop.updateSearchMap(self.bebop.current_position)
         return dataBuffer
