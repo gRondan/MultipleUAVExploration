@@ -74,7 +74,8 @@ class client:
             target=send_message_thread,
             args=(self, msj,)
         )
-        handler.start()
+        handler.start
+
 
 
     def reconect(self, msj, ip):

@@ -4,7 +4,7 @@ CHEQUEAR_STATUS_MISION, ATERRIZAR, MISION_FINALIZADA, SIN_CONEXION, CANCELAR_MIS
 from stateMachine.states import actualizarMapa, asignarPOI, aterrizar, bateriaBaja, bateriaCritica,
 cancelarMision, chequearStatus, despegar, desplazarse, enviarMensajes, explorar, fin, inicio,
 misionFinalizada, POICritico, POIVigilar, sinConexion, cargarBateria
-
+from properties import TIMEOUT, TIME_BETWEEN_POI_PING
 from flightplans import drone, droneTest
 
 class stateMachine():
@@ -19,9 +19,14 @@ class stateMachine():
         self.currentState = INICIO
         self.previousState = None
         self.bebop = drone.drone()
+        self.client = None
+        self.endMision = False
+        self.chequearMision = False
 
 
     def execute(self):
+        endExecutionTimer = Timer(TIMEOUT, self.isEndMision)
+        endExecutionTimer.start()
         while !self.end:
             print("currentState: "+str(self.currentState))
             if self.currentState == INICIO:
@@ -29,6 +34,7 @@ class stateMachine():
                 # inicioState.execute()
                 # currentState = inicioState.getNextState()
             elif currentState == DESPEGAR:
+                self.client = self.dataBuffer
                 self.dataBuffer = self.isInitPOICritico or self.isInitPOIVigilar
                 self.state = despegar(self.bebop, self.dataBuffer, self.previousState)
                 # despegarState.execute()
@@ -59,7 +65,7 @@ class stateMachine():
 
                 # currentState = actualizarMapaState.getNextState()
             elif currentState == ENVIAR_MENSAJES:
-                self.state = enviarMensajes(self.bebop, self.dataBuffer, self.previousState)
+                self.state = enviarMensajes(self.bebop, self.dataBuffer, self.client, self.chequearMision, self.endMision)
 
                 # currentState = enviarMensajesState.getNextState()
             elif currentState == POI_VIGILAR:
@@ -72,6 +78,9 @@ class stateMachine():
                 # currentState = POICriticoState.getNextState()
             elif currentState == CHEQUEAR_STATUS_MISION:
                 self.state = chequearStatus(self.bebop, self.dataBuffer, self.previousState)
+                self.chequearMision = False
+                t = Timer(TIME_BETWEEN_POI_PING, self.isChequearMision)
+                t.start()
 
                 # currentState = chequearStatusState.getNextState()
             elif currentState == ATERRIZAR:
@@ -103,3 +112,9 @@ class stateMachine():
         self.dataBuffer = self.state.execute()
         self.previousState = self.currentState
         self.currentState = self.state.getNextState()
+
+    def isChequearMision():
+        self.chequearMision = True
+
+    def isEndMision():
+        self.endMision = True
