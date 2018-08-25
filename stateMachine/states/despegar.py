@@ -3,20 +3,25 @@ from batteryEnum import LOW, CRITICAL, NORMAL
 from flightplans import drone
 
 class despegar():
-    def __init__(self, bebop,isAsignarPOI, previousState):
-        self.isAsignarPOI = isAsignarPOI
+    def __init__(self, bebop, dataBuffer, previousState):
+        self.poiPosition = dataBuffer
         self.bebop = bebop
 
     def getNextState(self):
         nextState = None
-        if self.isAsignarPOI:
+        if self.poiPosition != None:
             nextState = ASIGNAR_POI
-        elif self.bebop.checkBatteryStatus == LOW:
+        elif self.bebop.checkBatteryStatus() == CRITICAL:
             nextState = BATERIA_CRITICA
+        elif self.bebop.checkBatteryStatus() == LOW:
+            nextState = BATERIA_BAJA
         else:
             nextState = EXPLORAR
         return nextState
 
     def execute(self):
         bebop.take_off()
-        return None
+        if self.poiPosition != None:
+            return self.poiPosition
+        else:
+            return None
