@@ -9,9 +9,8 @@ from flightplans import drone, droneTest
 
 class stateMachine():
 
-    def __init__(self, isInitPOICritico,  isInitPOIVigilar, home):
-        self.isInitPOICritico = isInitPOICritico
-        self.isInitPOIVigilar = isInitPOIVigilar
+    def __init__(self, home, initPoiPosition):
+        self.initPoiPosition = initPoiPosition
         self.home = home
         self.dataBuffer = home
         self.state = None
@@ -35,7 +34,7 @@ class stateMachine():
                 # currentState = inicioState.getNextState()
             elif currentState == DESPEGAR:
                 self.client = self.dataBuffer
-                self.dataBuffer = self.isInitPOICritico or self.isInitPOIVigilar
+                self.dataBuffer = self.initPoiPosition
                 self.state = despegar(self.bebop, self.dataBuffer, self.previousState)
                 # despegarState.execute()
                 # currentState = despegarState.getNextState()

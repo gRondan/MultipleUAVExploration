@@ -16,7 +16,6 @@ class drone:
         self.mapa_ancho = properties.MAPA_ANCHO/self.rango_ancho
         self.search_map = [[0 for j in range(int(self.mapa_largo))]for i in range(int(self.mapa_ancho))]
         self.current_position = home
-        self.battery_status = NORMAL
         self.mutex_search_map = threading.Lock()
         self.bebop = Bebop()
         self.initialize()
@@ -50,7 +49,6 @@ class drone:
         self.poi_position = poiPosition
 
     def explore(self):
-
         #self.updateSearchMap(self.current_position)
         exitloop = False
         firstTime = True
@@ -99,7 +97,7 @@ class drone:
             distance2 = self.calculateDistance(self.poi_position, self.current_position)
             distance1 = self.calculateDistance(self.poi_position, tupla)
             return (condition and ( distance1 < distance2 ))
-        elif self.battery_status == NORMAL:
+        elif self.checkBatteryStatus() == NORMAL:
             return condition
         else:
             tupla = (x3,y3)
@@ -116,24 +114,14 @@ class drone:
         self.search_map[tupla[0]][tupla[1]] +=1
         self.mutex_search_map.release()
 
-    def getBatteryPercentage():
-        return NORMAL
-
-
-    def actualizarPosicion(self):
-        status = self.checkBatteryStatus()
-        self.battery_status = status
-
-        if status != CRITICAL:
-            self.explore()
-        else:
-            self.goHome()
+    def getBatteryPercentage(self):
+        return self.bebop.sensors.battery
 
     def checkBatteryStatus(self):
         batteryPercentage = self.getBatteryPercentage()
-        if  batteryPercentage < 5:
+        if batteryPercentage < 5:
             return CRITICAL
-        elif  batteryPercentage < 10:
+        elif batteryPercentage < 10:
             return LOW
         else:
             return NORMAL

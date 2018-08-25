@@ -1,8 +1,8 @@
-from stateMachine.statesEnum import ENVIAR_MENSAJES, POI_CRITICO
+from stateMachine.statesEnum import ACTUALIZAR_POI
 
 class POICritico():
     def __init__(self, bebop, dataBuffer, previousState):
-        self.nextState = ENVIAR_MENSAJES
+        self.nextState = ACTUALIZAR_POI
         self.bebop = bebop
         self.position_poi = dataBuffer
 
@@ -11,4 +11,4 @@ class POICritico():
 
     def execute(self):
         self.bebop.move(self.position_poi)
-        return POI_CRITICO
+        return self.position_poi
