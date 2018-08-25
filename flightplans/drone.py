@@ -130,13 +130,7 @@ class drone:
             return NORMAL
 
     def goHome(self):
-        x1 = self.getNewCoordinate(0)
-        y1 = self.getNewCoordinate(1)
-        self.current_position = (x1,y1)
-        self.updateSearchMap(self.current_position)
-        self.mutex_search_map.acquire()
-        utils.printMatrix(self.search_map)
-        self.mutex_search_map.release()
+        self.move(self.home)
 
 
     def getNewCoordinate(self, pos):
