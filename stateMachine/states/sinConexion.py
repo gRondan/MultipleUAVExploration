@@ -1,3 +1,5 @@
+from stateMachine.states import ATERRIZAR, CANCELAR_MISION
+
 class sinConexion():
     def __init__(self, bebop, dataBuffer, previousState, client):
         self.bebop = bebop
