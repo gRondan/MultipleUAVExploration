@@ -2,7 +2,8 @@ from stateMachine.statesEnum import EXPLORAR, POI_VIGILAR, POI_CRITICO, ASIGNAR_
 from utils import cartesianDistance, createMessage
 from properties import DISTANCE_ENERGY_RATIO, LOW_BATTERY, WAIT_TIME, POI_CRITICAL_EPSILON
 import time
-from threading import Timer
+import threading
+from connections.message_type import AVAILABLE, UNAVAILABLE, DISTANCE, RESULT, POI_ALREADY_ASSIGNED
 
 
 class asignarPOI():
@@ -13,11 +14,15 @@ class asignarPOI():
         self.client = client
         self.result = 'unasign'
         self.messages = messages
-        self.availableDrones = [elem['content'] for elem in messages if elem['message_type'] == 'available']
-        self.unavailableDrones = [elem['content'] for elem in messages if elem['message_type'] == 'unavailable']
-        self.availableDistances = [elem['content'] for elem in messages if elem['message_type'] == 'distance']
-        self.availableResults = [elem['content'] for elem in messages if elem['message_type'] == 'result']
+        self.availableDrones = [elem['content'] for elem in messages if elem['message_type'] == AVAILABLE]
+        self.unavailableDrones = [elem['content'] for elem in messages if elem['message_type'] == UNAVAILABLE]
+        self.availableDistances = [elem['content'] for elem in messages if elem['message_type'] == DISTANCE]
+        self.availableResults = [elem['content'] for elem in messages if elem['message_type'] == RESULT]
+        self.poiAlreadyAssigned = [elem['content'] for elem in messages if elem['message_type'] == POI_ALREADY_ASSIGNED]
         self.timeout = False
+        self.messageMutex = threading.Lock()
+        self.messageWait = threading.Lock()
+        self.blockHandleMessage = threading.Lock()
 
     def getNextState(self):
         if self.result == 'unasign':
@@ -28,6 +33,13 @@ class asignarPOI():
             return POI_CRITICO
 
     def execute(self):
+        if len(self.poiAlreadyAssigned > 0):
+            return None
+
+        if len(self.availableDistances) > 0 or len(self.availableResults) > 0:
+            # im late to the party
+            return None
+
         connected_drones = self.client.check_friends()
         distance = cartesianDistance(self.poi, self.bebop.current_position)
         available_battery = self.bebop.getBatteryPercentage()
@@ -42,27 +54,43 @@ class asignarPOI():
                 self.client.send_message(message)
             return None
 
-        timer1 = Timer(WAIT_TIME, self.timeout)
+        timer1 = threading.Timer(WAIT_TIME, self.timeout)
         timer1.start()
-        while len(self.availableDrones) + len(self.unavailableDrones) < len(connected_drones) and not self.timeout:
-            pass
+
+        conditionMet = False
+        while not conditionMet and not self.timeout:
+            self.waitMessage.acquire()
+            self.blockHandleMessage.release()
+            self.messageMutex.acquire()
+            conditionMet = len(self.availableDrones) + len(self.unavailableDrones) >= len(connected_drones)
+            self.messageMutex.release()
+
         self.timeout = False
         timer1.cancel()
         availableDronesNumber = len(self.availableDrones)
 
         message2 = createMessage(ASIGNAR_POI, 'distance', {'ip': self.bebop.ip, 'distance': distance})
+        self.messageMutex.acquire()
         for ip in self.availableDrones:
             self.client.send_direct_message(message2, ip)
+        self.messageMutex.release()
 
-        timer2 = Timer(WAIT_TIME, self.timeout)
+        timer2 = threading.Timer(WAIT_TIME, self.timeout)
         timer2.start()
-        while len(self.availableDistances) < availableDronesNumber and not self.timeout:
-            pass
+        conditionMet = False
+        while not conditionMet and not self.timeout:
+            self.waitMessage.acquire()
+            self.blockHandleMessage.release()
+            self.messageMutex.acquire()
+            conditionMet = len(self.availableDistances) >= availableDronesNumber
+            self.messageMutex.release()
         self.timeout = False
         timer2.cancel()
 
         minDistance = distance
         minIp = self.bebop.ip
+
+        self.messageMutex.acquire()
         for elem in self.availableDistances:
             if elem["distance"] < minDistance:
                 minDistance = elem["distance"]
@@ -71,16 +99,25 @@ class asignarPOI():
         message3 = createMessage(asignarPOI, 'result', minIp)
         for ip in self.availableDrones:
             self.client.send_direct_message(message3, ip)
+        self.messageMutex.release()
 
-        timer3 = Timer(WAIT_TIME, self.timeout)
+        timer3 = threading.Timer(WAIT_TIME, self.timeout)
         timer3.start()
-        while len(self.availableResults) < len(self.availableDrones) and not self.timeout:
-            pass
+        conditionMet = False
+        while not conditionMet and not self.timeout:
+            self.waitMessage.acquire()
+            self.blockHandleMessage.release()
+            self.messageMutex.acquire()
+            conditionMet = len(self.availableResults) >= len(self.availableDrones)
+            self.messageMutex.release()
+
         self.timeout = False
         timer3.cancel()
 
         concensus = ''
         concensusValue = 0
+        self.messageMutex.acquire()
+        self.availableDrones.append(self.bebop.ip)
         for ip in self.availableDrones:
             count = 0
             for elem in self.availableResults:
@@ -89,6 +126,7 @@ class asignarPOI():
             if count > concensusValue:
                 concensusValue = count
                 concensus = ip
+        self.messageMutex.release()
 
         if concensus == self.bebop.ip:
             if time.time() - self.bebop.search_map[self.poi[0]][self.poi[1]] > POI_CRITICAL_EPSILON:
@@ -102,11 +140,15 @@ class asignarPOI():
         self.timeout = True
 
     def handleMessage(self, message):
-        if message["message_type"] == 'available':
+        self.blockHandleMessage.acquire()
+        self.messageMutex.acquire()
+        if message["message_type"] == AVAILABLE:
             self.availableDrones.append(message["content"])
-        if message["message_type"] == 'available':
+        elif message["message_type"] == UNAVAILABLE:
             self.unavailableDrones.append(message["content"])
-        if message["message_type"] == 'distance':
+        elif message["message_type"] == DISTANCE:
             self.availableDistances.append(message["content"])
-        if message["message_type"] == 'result':
+        elif message["message_type"] == RESULT:
             self.availableResults.append(message["content"])
+        self.messageMutex.release()
+        self.messageWait.release()
