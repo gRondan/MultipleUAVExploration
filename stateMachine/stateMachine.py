@@ -4,7 +4,7 @@ ENVIAR_MENSAJES, POI_VIGILAR, CARGAR, GENERAL, CHEQUEAR_STATUS_MISION,
 ATERRIZAR, MISION_FINALIZADA, PING_SIN_CONEXION, CANCELAR_MISION,
 ACTUALIZAR_MAPA_SIN_CONEXION, FIN, POI_CRITICO, DESPLAZARSE_SIN_CONEXION)
 from stateMachine.states import (actualizarMapaSinConexion, actualizarMapa,
-asignarPOI, aterrizar, bateriaBaja, bateriaCritica, cancelarMision, chequearStatus,
+asignarPOI, aterrizar, bateriaBaja, bateriaCritica, cancelarMision, chequearStatusMision,
 despegar, desplazarse, enviarMensajes, explorar, fin, inicio, misionFinalizada, POICritico,
 POIVigilar, pingSinConexion, cargarBateria, desplazarseSinConexion)
 from properties import TIMEOUT, TIME_BETWEEN_POI_PING

@@ -15,12 +15,8 @@ class inicio():
         return self.nextState
 
     def execute(self):
-        self.bebop.initialize(self.home)
-        return self.processConections()
-
-    def processConections(self):
         my_ip = server.get_server_ip()
-        self.bebop.ip = my_ip
+        self.bebop.initialize(my_ip)
         client_handler = threading.Thread(
             target=server.run_server,
             args=(my_ip, self.bebop,)

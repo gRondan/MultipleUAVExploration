@@ -1,7 +1,7 @@
 from stateMachine.statesEnum import CHEQUEAR_STATUS_MISION, DESPLAZARSE_SIN_CONEXION, MISION_FINALIZADA, GENERAL
 from utils import createMessage
 from connections.message_type import UPDATE_MAP
-from properties import TIME_BETWEEN_POI_PING, POI_VIGILAR_EPSILON
+from properties import TIME_BETWEEN_POI_PING, POI_EPSILON
 import time
 import utils
 
@@ -45,7 +45,7 @@ class enviarMensajes():
 
     def isAsignarPOI(self):
         for poi in self.POIPositions:
-            if time.time() - self.bebop.search_map[poi[0]][poi[1]] > POI_VIGILAR_EPSILON:
+            if time.time() - self.bebop.search_map[poi[0]][poi[1]] > POI_EPSILON:
                 return poi
         return None
 

@@ -1,4 +1,4 @@
-from stateMachine.states import DESPLAZARSE
+from stateMachine.statesEnum import DESPLAZARSE
 
 
 class explorar():
