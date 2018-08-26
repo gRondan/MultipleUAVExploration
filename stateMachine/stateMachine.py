@@ -13,7 +13,7 @@ from utils import createMessage
 from connections.message_type import UPDATE_MAP, MISSION_ABORTED, POI_ALREADY_ASSIGNED
 import stateMachine.statesEnum as enum
 import time
-from threading import Timer
+from threading import Timer, Lock
 
 
 class stateMachine():
@@ -32,6 +32,7 @@ class stateMachine():
         self.messages = {i: [] for i in dir(enum) if not i.startswith('_')}
         self.assignedPOIs = {}
         self.POIPositions = POIPositions
+        self.messageMutex = Lock()
 
     def execute(self):
         endExecutionTimer = Timer(TIMEOUT, self.isEndMision)
@@ -43,7 +44,7 @@ class stateMachine():
                 # inicioState.execute()
                 # currentState = inicioState.getNextState()
             elif self.currentState == DESPEGAR:
-                if previousState == INICIO:
+                if self.previousState == INICIO:
                     self.client = self.dataBuffer
                     self.dataBuffer = self.initPoiPosition
                 self.state = despegar(self.bebop, self.dataBuffer, self.previousState, self.messages[self.currentState])
@@ -135,6 +136,7 @@ class stateMachine():
 
     # server related methods
     def handleMessage(self, message):
+        self.messageMutex.acquire()
         if message["state"] == GENERAL:
             if message["message_type"] == UPDATE_MAP:
                 self.bebop.updateSearchMap(message["content"])
@@ -144,6 +146,7 @@ class stateMachine():
             self.state.handleMessage(message)
         else:
             self.messages[message["state"]].append(message)
+        self.messageMutex.release()
 
     def checkPOIStatus(self, ipDron, poi):
         if poi in self.assignedPOIs:
