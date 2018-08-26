@@ -1,9 +1,12 @@
 from stateMachine.statesEnum import (INICIO, DESPEGAR,
 ASIGNAR_POI, BATERIA_BAJA, BATERIA_CRITICA, DESPLAZARSE, ACTUALIZAR_MAPA,
 ENVIAR_MENSAJES, POI_VIGILAR, CARGAR, GENERAL, CHEQUEAR_STATUS_MISION,
-ATERRIZAR, MISION_FINALIZADA, SIN_CONEXION, CANCELAR_MISION,
-ACTUALIZAR_MAPA_SIN_CONEXION, FIN, POI_CRITICO)
-from stateMachine.states import actualizarMapaSinConexion, actualizarMapa, asignarPOI, aterrizar, bateriaBaja, bateriaCritica, cancelarMision, chequearStatus, despegar, desplazarse, enviarMensajes, explorar, fin, inicio, misionFinalizada, POICritico, POIVigilar, sinConexion, cargarBateria
+ATERRIZAR, MISION_FINALIZADA, PING_SIN_CONEXION, CANCELAR_MISION,
+ACTUALIZAR_MAPA_SIN_CONEXION, FIN, POI_CRITICO, DESPLAZARSE_SIN_CONEXION)
+from stateMachine.states import (actualizarMapaSinConexion, actualizarMapa,
+asignarPOI, aterrizar, bateriaBaja, bateriaCritica, cancelarMision, chequearStatus,
+despegar, desplazarse, enviarMensajes, explorar, fin, inicio, misionFinalizada, POICritico,
+POIVigilar, pingSinConexion, cargarBateria, desplazarseSinConexion)
 from properties import TIMEOUT, TIME_BETWEEN_POI_PING
 from flightplans import drone, droneTest
 import stateMachine.statesEnum as enum
@@ -99,8 +102,8 @@ class stateMachine():
                 self.state = cancelarMision(self.bebop, self.dataBuffer, self.previousState, self.messages[self.currentState])
 
                 # currentState = cancelarMisionState.getNextState()
-            elif self.currentState == SIN_CONEXION:
-                self.state = sinConexion(self.bebop, self.dataBuffer, self.previousState, self.client, self.messages[self.currentState])
+            elif self.currentState == PING_SIN_CONEXION:
+                self.state = pingSinConexion(self.bebop, self.dataBuffer, self.previousState, self.client, self.messages[self.currentState])
 
                 # currentState = sinConexionState.getNextState()
             elif self.currentState == FIN:
@@ -108,6 +111,9 @@ class stateMachine():
 
             elif self.currentState == ACTUALIZAR_MAPA_SIN_CONEXION:
                 self.state = actualizarMapaSinConexion(self.bebop, self.dataBuffer, self.previousState, self.messages[self.currentState])
+
+            elif self.currentState == DESPLAZARSE_SIN_CONEXION:
+                self.state = desplazarseSinConexion(self.bebop, self.dataBuffer, self.previousState, self.messages[self.currentState])
 
             elif self.currentState == CARGAR:
                 self.state = fin(self.bebop, self.dataBuffer, self.previousState, self.messages[self.currentState])
