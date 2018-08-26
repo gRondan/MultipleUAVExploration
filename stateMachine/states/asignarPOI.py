@@ -1,4 +1,4 @@
-from stateMachine.statesEnum import EXPLORAR, POI_VIGILAR, POI_CRITICO, ASIGNAR_POI
+from stateMachine.statesEnum import EXPLORAR, POI_VIGILAR, POI_CRITICO, ASIGNAR_POI, CANCELAR_MISION
 from utils import cartesianDistance, createMessage
 from properties import DISTANCE_ENERGY_RATIO, LOW_BATTERY, WAIT_TIME, POI_CRITICAL_EPSILON
 import time
@@ -7,7 +7,7 @@ from connections.message_type import AVAILABLE, UNAVAILABLE, DISTANCE, RESULT, P
 
 
 class asignarPOI():
-    def __init__(self, bebop, dataBuffer, previousState, client, messages):
+    def __init__(self, bebop, dataBuffer, previousState, client, idMessage, messages):
         self.bebop = bebop
         self.previousState = previousState
         self.poi = dataBuffer
@@ -18,11 +18,12 @@ class asignarPOI():
         self.unavailableDrones = [elem['content'] for elem in messages if elem['message_type'] == UNAVAILABLE]
         self.availableDistances = [elem['content'] for elem in messages if elem['message_type'] == DISTANCE]
         self.availableResults = [elem['content'] for elem in messages if elem['message_type'] == RESULT]
-        self.poiAlreadyAssigned = [elem['content'] for elem in messages if elem['message_type'] == POI_ALREADY_ASSIGNED]
+        self.poiAlreadyAssigned = [elem['content'] for elem in messages if elem['message_type'] == POI_ALREADY_ASSIGNED and elem['message_id'] == idMessage]
         self.timeout = False
         self.messageMutex = threading.Lock()
         self.messageWait = threading.Lock()
         self.blockHandleMessage = threading.Lock()
+        self.idMessage = idMessage
 
     def getNextState(self):
         if self.result == 'unasign':
@@ -33,7 +34,7 @@ class asignarPOI():
             return POI_CRITICO
 
     def execute(self):
-        if len(self.poiAlreadyAssigned > 0):
+        if len(self.poiAlreadyAssigned) > 0 and self.previousState == CANCELAR_MISION:
             return None
 
         if len(self.availableDistances) > 0 or len(self.availableResults) > 0:
@@ -150,5 +151,7 @@ class asignarPOI():
             self.availableDistances.append(message["content"])
         elif message["message_type"] == RESULT:
             self.availableResults.append(message["content"])
+        elif message["message_type"] == POI_ALREADY_ASSIGNED and message['message_id'] == self.idMessage:
+            self.poiAlreadyAssigned.append(message["content"])
         self.messageMutex.release()
         self.messageWait.release()

@@ -33,6 +33,7 @@ class stateMachine():
         self.assignedPOIs = {}
         self.POIPositions = POIPositions
         self.messageMutex = Lock()
+        self.idMessage = 1
 
     def execute(self):
         endExecutionTimer = Timer(TIMEOUT, self.isEndMision)
@@ -55,7 +56,7 @@ class stateMachine():
                 # previousState = currentState;
                 # currentState = explorarState.getNextState()
             elif self.currentState == ASIGNAR_POI:
-                self.state = asignarPOI(self.bebop, self.dataBuffer, self.previousState, self.client, self.messages[self.currentState])
+                self.state = asignarPOI(self.bebop, self.dataBuffer, self.previousState, self.client, self.idMessage, self.messages[self.currentState])
                 startTime = time.time()
                 startTime.start()
                 self.assignedPOIs[self.dataBuffer] = startTime
@@ -103,7 +104,7 @@ class stateMachine():
 
                 # currentState = misionFinalizadaState.getNextState()
             elif self.currentState == CANCELAR_MISION:
-                self.state = cancelarMision(self.bebop, self.dataBuffer, self.previousState, self.messages[self.currentState])
+                self.state = cancelarMision(self.bebop, self.dataBuffer, self.previousState, self.idMessage, self.messages[self.currentState])
 
                 # currentState = cancelarMisionState.getNextState()
             elif self.currentState == PING_SIN_CONEXION:
@@ -130,6 +131,7 @@ class stateMachine():
         self.messages[self.currentState] = []
         self.previousState = self.currentState
         self.currentState = self.state.getNextState()
+        self.idMessage += 1
 
     def isEndMision(self):
         self.endMision = True
