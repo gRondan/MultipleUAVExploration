@@ -1,6 +1,6 @@
 class cancelarMision():
-    def __init__(self):
-
+    def __init__(self, messages):
+        self.messages = messages
     def getNextState():
 
         if cancelarMisionTransitions.isBateriaBaja():
@@ -9,3 +9,5 @@ class cancelarMision():
             actualState = BATERIA_CRITICA
         elif cancelarMisionTransitions.isExplorar():
             actualState = EXPLORAR
+    def handleMessage(self, message):
+        self.messages.append(message)

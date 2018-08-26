@@ -21,7 +21,7 @@ class enviarMensajes():
 
     def execute(self):
         if not self.timeout:
-            if client.check_friends() > 0:
+            if len(client.check_friends()) > 0:
                 message = bebop.current_position
                 client.send_message(message)
             else:

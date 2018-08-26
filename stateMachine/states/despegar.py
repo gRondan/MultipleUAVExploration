@@ -3,9 +3,10 @@ from batteryEnum import LOW, CRITICAL, NORMAL
 from flightplans import drone
 
 class despegar():
-    def __init__(self, bebop,isAsignarPOI, previousState):
+    def __init__(self, bebop,isAsignarPOI, previousState, messages):
         self.isAsignarPOI = isAsignarPOI
         self.bebop = bebop
+        self.messages = messages
 
     def getNextState(self):
         nextState = None
@@ -20,3 +21,6 @@ class despegar():
     def execute(self):
         bebop.take_off()
         return None
+
+    def handleMessage(self, message):
+        self.messages.append(message)

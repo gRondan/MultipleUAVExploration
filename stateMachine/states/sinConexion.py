@@ -18,6 +18,6 @@ class sinConexion():
             new_coordinate = self.bebop.getNewCoordinate()
             self.bebop.move(new_coordinate)
             cont = self.client.check_friends()
-            if cont > 0:
+            if len(cont) > 0:
                 disconnected = False
         return None

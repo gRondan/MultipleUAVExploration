@@ -1,11 +1,12 @@
 from stateMachine.statesEnum import INICIO, DESPEGAR, EXPLORAR, ASIGNAR_POI, BATERIA_BAJA, BATERIA_CRITICA, DESPLAZARSE,
-ACTUALIZAR_MAPA, ENVIAR_MENSAJES, POI_VIGILAR, POI_CRITICO, CARGAR
+ACTUALIZAR_MAPA, ENVIAR_MENSAJES, POI_VIGILAR, POI_CRITICO, CARGAR, GENERAL
 CHEQUEAR_STATUS_MISION, ATERRIZAR, MISION_FINALIZADA, SIN_CONEXION, CANCELAR_MISION, FIN
 from stateMachine.states import actualizarMapa, asignarPOI, aterrizar, bateriaBaja, bateriaCritica,
 cancelarMision, chequearStatus, despegar, desplazarse, enviarMensajes, explorar, fin, inicio,
 misionFinalizada, POICritico, POIVigilar, sinConexion, cargarBateria
 from properties import TIMEOUT, TIME_BETWEEN_POI_PING
 from flightplans import drone, droneTest
+import stateMachine.statesEnum as enum
 
 class stateMachine():
 
@@ -22,6 +23,7 @@ class stateMachine():
         self.client = None
         self.endMision = False
         self.chequearMision = False
+        self.messages = {i:[] for i in dir(enum) if not i.startswith('_')] }
 
 
     def execute(self):
@@ -30,91 +32,102 @@ class stateMachine():
         while !self.end:
             print("currentState: "+str(self.currentState))
             if self.currentState == INICIO:
-                self.state = inicio(self.bebop, self.dataBuffer, self.previousState)
+                self.state = inicio(self.bebop, self.dataBuffer, self.previousState, self.messages[currentState])
                 # inicioState.execute()
                 # currentState = inicioState.getNextState()
-            elif currentState == DESPEGAR:
+            elif self.currentState == DESPEGAR:
                 self.client = self.dataBuffer
                 self.dataBuffer = self.isInitPOICritico or self.isInitPOIVigilar
-                self.state = despegar(self.bebop, self.dataBuffer, self.previousState)
+                self.state = despegar(self.bebop, self.dataBuffer, self.previousState, self.messages[currentState])
                 # despegarState.execute()
                 # currentState = despegarState.getNextState()
-            elif currentState == CANCELAR_MISION:
+            elif self.currentState == CANCELAR_MISION:
                 self.state = cancelarMision()
-                self.state = explorar(self.bebop, self.dataBuffer, self.previousState)
+                self.state = explorar(self.bebop, self.dataBuffer, self.previousState, self.messages[currentState])
                 # previousState = currentState;
                 # currentState = explorarState.getNextState()
-            elif currentState == ASIGNAR_POI:
-                self.state = asignarPOI(self.bebop, self.dataBuffer, self.previousState)
+            elif self.currentState == ASIGNAR_POI:
+                self.state = asignarPOI(self.bebop, self.dataBuffer, self.previousState, self.messages[currentState], self.client)
 
                 # currentState = asignarPOIState.getNextState()
-            elif currentState == BATERIA_BAJA:
-                self.state = bateriaBaja(self.bebop, self.dataBuffer, self.previousState)
+            elif self.currentState == BATERIA_BAJA:
+                self.state = bateriaBaja(self.bebop, self.dataBuffer, self.previousState, self.messages[currentState])
 
                 # currentState = bateriaBajaState.getNextState()
-            elif currentState == BATERIA_CRITICA:
-                self.state = bateriaCritica(self.bebop, self.dataBuffer, self.previousState)
+            elif self.currentState == BATERIA_CRITICA:
+                self.state = bateriaCritica(self.bebop, self.dataBuffer, self.previousState, self.messages[currentState])
 
                 # currentState = bateriaCriticaState.getNextState()
-            elif currentState == DESPLAZARSE:
-                self.state = desplazarse(self.bebop, self.dataBuffer, self.previousState)
+            elif self.currentState == DESPLAZARSE:
+                self.state = desplazarse(self.bebop, self.dataBuffer, self.previousState, self.messages[currentState])
                 # desplazarseState.execute()
                 # currentState = desplazarseState.getNextState()
-            elif currentState == ACTUALIZAR_MAPA:
-                self.state = actualizarMapa(self.bebop, self.dataBuffer, self.previousState)
+            elif self.currentState == ACTUALIZAR_MAPA:
+                self.state = actualizarMapa(self.bebop, self.dataBuffer, self.previousState, self.messages[currentState])
 
                 # currentState = actualizarMapaState.getNextState()
-            elif currentState == ENVIAR_MENSAJES:
-                self.state = enviarMensajes(self.bebop, self.dataBuffer, self.client, self.chequearMision, self.endMision)
+            elif self.currentState == ENVIAR_MENSAJES:
+                self.state = enviarMensajes(self.bebop, self.dataBuffer, self.messages[currentState], self.client, self.chequearMision, self.endMision)
 
                 # currentState = enviarMensajesState.getNextState()
-            elif currentState == POI_VIGILAR:
-                self.state = POIVigilar(self.bebop, self.dataBuffer, self.previousState)
+            elif self.currentState == POI_VIGILAR:
+                self.state = POIVigilar(self.bebop, self.dataBuffer, self.previousState, self.messages[currentState])
 
                 # currentState = POIVigilarState.getNextState()
-            elif currentState == POI_CRITICO:
-                self.state = POICritico(self.bebop, self.dataBuffer, self.previousState)
+            elif self.currentState == POI_CRITICO:
+                self.state = POICritico(self.bebop, self.dataBuffer, self.previousState,self.messages[currentState])
 
                 # currentState = POICriticoState.getNextState()
-            elif currentState == CHEQUEAR_STATUS_MISION:
-                self.state = chequearStatus(self.bebop, self.dataBuffer, self.previousState)
+            elif self.currentState == CHEQUEAR_STATUS_MISION:
+                self.state = chequearStatus(self.bebop, self.dataBuffer, self.previousState, self.messages[currentState])
                 self.chequearMision = False
                 t = Timer(TIME_BETWEEN_POI_PING, self.isChequearMision)
                 t.start()
 
                 # currentState = chequearStatusState.getNextState()
-            elif currentState == ATERRIZAR:
-                self.state = aterrizar(self.bebop, self.dataBuffer, self.previousState)
+            elif self.currentState == ATERRIZAR:
+                self.state = aterrizar(self.bebop, self.dataBuffer, self.previousState, self.messages[currentState])
 
                 # currentState = aterrizarState.getNextState()
-            elif currentState == MISION_FINALIZADA:
-                self.state = misionFinalizada(self.bebop, self.dataBuffer, self.previousState)
+            elif self.currentState == MISION_FINALIZADA:
+                self.state = misionFinalizada(self.bebop, self.dataBuffer, self.previousState, self.messages[currentState])
 
                 # currentState = misionFinalizadaState.getNextState()
-            elif currentState == CANCELAR_MISION:
-                self.state = cancelarMision(self.bebop, self.dataBuffer, self.previousState)
+            elif self.currentState == CANCELAR_MISION:
+                self.state = cancelarMision(self.bebop, self.dataBuffer, self.previousState, self.messages[currentState])
 
                 # currentState = cancelarMisionState.getNextState()
-            elif currentState == SIN_CONEXION:
-                self.state = sinConexion(self.bebop, self.dataBuffer, self.previousState, self.client)
+            elif self.currentState == SIN_CONEXION:
+                self.state = sinConexion(self.bebop, self.dataBuffer, self.previousState, self.messages[currentState], self.client)
 
                 # currentState = sinConexionState.getNextState()
-            elif currentState == FIN:
-                self.state = cargarBateria(self.bebop, self.dataBuffer, self.previousState)
+            elif self.currentState == FIN:
+                self.state = cargarBateria(self.bebop, self.dataBuffer, self.previousState, self.messages[currentState])
 
-            elif currentState == CARGAR:
-                self.state = fin(self.bebop, self.dataBuffer, self.previousState)
+            elif self.currentState == CARGAR:
+                self.state = fin(self.bebop, self.dataBuffer, self.previousState, self.messages[currentState])
                 self.end = True
 
             self.processState()
 
     def processState(self):
         self.dataBuffer = self.state.execute()
+        self.messages[currentState] = []
         self.previousState = self.currentState
         self.currentState = self.state.getNextState()
 
-    def isChequearMision():
+    def isChequearMision(self):
         self.chequearMision = True
 
-    def isEndMision():
+    def isEndMision(self):
         self.endMision = True
+
+    #server related methods
+    def handleMessage(self, message):
+        if message["state"] == GENERAL:
+            if message["message_type"] == 'update_map':
+                self.bebop.updateSearchMap(message["content"])
+        elif self.currentState == message["state"]:
+            self.state.handleMessage(message)
+        else:
+            self.messages[message["state"]].append(message)
