@@ -5,7 +5,7 @@ from properties import TIME_BETWEEN_POI_PING, POI_CRITICAL_EPSILON
 import time
 
 class enviarMensajes():
-    def __init__(self, bebop, dataBuffer, client, timerChequearStatus, timeout, POIPositions):
+    def __init__(self, bebop, dataBuffer, client, timerChequearStatus, timeout, POIPositions, messages):
         self.bebop = bebop
         self.nextState = dataBuffer
         self.client = client
@@ -46,3 +46,6 @@ class enviarMensajes():
             if time.time() - self.bebop.search_map[poi[0]][poi[1]] > POI_VIGILAR_EPSILON:
                 return poi
         return None
+
+    def handleMessage(self, message):
+        self.messages.append(message)
