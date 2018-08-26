@@ -1,6 +1,6 @@
 from connections import client
 from connections.message_type import MISSION_OK
-from stateMachine.statesEnum import ASIGNAR_POI, CHEQUEAR_STATUS_MISION
+from stateMachine.statesEnum import ASIGNAR_POI, GENERAL
 from utils import createMessage
 import time
 
@@ -17,7 +17,7 @@ class chequearStatusMision():
     def execute(self):
         result = None
         if client.check_connection(self.ip) == 0
-            client.send_message(createMessage(CHEQUEAR_STATUS_MISION,MISSION_OK,"ok"))
+            client.send_message(createMessage(ASIGNAR_POI,MISSION_OK,"ok"))
         else
             self.nextState = ASIGNAR_POI
             result = self.ip

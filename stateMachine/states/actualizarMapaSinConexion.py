@@ -1,4 +1,4 @@
-from stateMachine.statesEnum import PING_SIN_CONEXION, ACTUALIZAR_MAPA_SIN_CONEXION
+from stateMachine.statesEnum import PING_SIN_CONEXION, ACTUALIZAR_MAPA_SIN_CONEXION, GENERAL
 from utils import createMessage
 from connections import client
 from connections.message_type import UPDATE_MAP
@@ -15,5 +15,5 @@ class actualizarMapaSinConexion():
 
     def execute(self):
         self.bebop.updateSearchMap(self.bebop.current_position)
-        self.client.send_message(createMessage(ACTUALIZAR_MAPA_SIN_CONEXION, UPDATE_MAP, utils.convertTupleToString(self.bebop.current_position)))
+        self.client.send_message(createMessage(GENERAL, UPDATE_MAP, utils.convertTupleToString(self.bebop.current_position)))
         return None

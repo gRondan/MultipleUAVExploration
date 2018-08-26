@@ -1,5 +1,5 @@
 from flightplans import drone
-from stateMachine.statesEnum import CHEQUEAR_STATUS_MISION, DESPLAZARSE_SIN_CONEXION, MISION_FINALIZADA
+from stateMachine.statesEnum import CHEQUEAR_STATUS_MISION, DESPLAZARSE_SIN_CONEXION, MISION_FINALIZADA, GENERAL
 from utils import createMessage, convertTupleToString
 from properties import TIME_BETWEEN_POI_PING, POI_CRITICAL_EPSILON
 import time
@@ -24,7 +24,7 @@ class enviarMensajes():
     def execute(self):
         if not self.timeout:
             if len(client.check_friends()) != 0:
-                client.send_message(createMessage(ENVIAR_MENSAJES,UPDATE_MAP,utils.convertTupleToString(self.bebop.current_position)))
+                client.send_message(createMessage(GENERAL,UPDATE_MAP,utils.convertTupleToString(self.bebop.current_position)))
             else:
                 self.nextState = DESPLAZARSE_SIN_CONEXION
                 return client
