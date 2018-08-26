@@ -1,7 +1,8 @@
-from stateMachine.statesEnum import PING_SIN_CONEXION, ACTUALIZAR_MAPA_SIN_CONEXION, GENERAL
+from stateMachine.statesEnum import PING_SIN_CONEXION, GENERAL
 from utils import createMessage
-from connections import client
 from connections.message_type import UPDATE_MAP
+import utils
+
 
 class actualizarMapaSinConexion():
     def __init__(self, bebop, dataBuffer, previousState):

@@ -1,8 +1,9 @@
 from connections import client
 from connections.message_type import MISSION_OK
-from stateMachine.statesEnum import ASIGNAR_POI, GENERAL
+from stateMachine.statesEnum import ASIGNAR_POI
 from utils import createMessage
 import time
+
 
 class chequearStatusMision():
     def __init__(self, bebop, dataBuffer, previousState, client, timerChequearStatus, messages):
@@ -17,9 +18,9 @@ class chequearStatusMision():
 
     def execute(self):
         result = None
-        if client.check_connection(self.ip) == 0
-            client.send_message(createMessage(ASIGNAR_POI,MISSION_OK,"ok"))
-        else
+        if client.check_connection(self.ip) == 0:
+            client.send_message(createMessage(ASIGNAR_POI, MISSION_OK, "ok"))
+        else:
             self.nextState = ASIGNAR_POI
             result = self.ip
         self.timerChequearStatus[self.ip] = time.time()

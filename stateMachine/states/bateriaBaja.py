@@ -1,17 +1,19 @@
-from stateMachine.statesEnum import ENVIAR_MENSAJES, DESPLAZARSE
+from stateMachine.statesEnum import DESPLAZARSE
+
 
 class bateriaBaja():
-	 def __init__(self, bebop, dataBuffer, previousState, messages):
+    def __init__(self, bebop, dataBuffer, previousState, messages):
         self.nextState = DESPLAZARSE
         self.bebop = bebop
         self.messages = messages
         self.previousState = previousState
 
-    def getNextState():
+    def getNextState(self):
         return self.nextState
 
     def execute(self):
-    	self.bebop.setPoiPosition(None)
+        self.bebop.setPoiPosition(None)
         return self.bebop.explore()
+
     def handleMessage(self, message):
         self.messages.append(message)

@@ -1,5 +1,6 @@
 from stateMachine.statesEnum import ATERRIZAR
 
+
 class bateriaCritica():
     def __init__(self, bebop, dataBuffer, previousState, messages):
         self.nextState = ATERRIZAR

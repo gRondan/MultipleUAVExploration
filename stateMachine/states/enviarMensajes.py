@@ -1,8 +1,10 @@
-from flightplans import drone
 from stateMachine.statesEnum import CHEQUEAR_STATUS_MISION, DESPLAZARSE_SIN_CONEXION, MISION_FINALIZADA, GENERAL
-from utils import createMessage, convertTupleToString
-from properties import TIME_BETWEEN_POI_PING, POI_CRITICAL_EPSILON
+from utils import createMessage
+from connections.message_type import UPDATE_MAP
+from properties import TIME_BETWEEN_POI_PING, POI_VIGILAR_EPSILON
 import time
+import utils
+
 
 class enviarMensajes():
     def __init__(self, bebop, dataBuffer, client, timerChequearStatus, timeout, POIPositions, messages):
@@ -23,13 +25,13 @@ class enviarMensajes():
 
     def execute(self):
         if not self.timeout:
-            if len(client.check_friends()) != 0:
-                client.send_message(createMessage(GENERAL,UPDATE_MAP,utils.convertTupleToString(self.bebop.current_position)))
+            if len(self.client.check_friends()) != 0:
+                self.client.send_message(createMessage(GENERAL, UPDATE_MAP, utils.convertTupleToString(self.bebop.current_position)))
             else:
                 self.nextState = DESPLAZARSE_SIN_CONEXION
-                return client
+                return self.client
             poi = self.isAsignarPOI()
-            if poi == None:
+            if poi is not None:
                 return self.isChequearMision()
             return poi
         return None
@@ -38,11 +40,11 @@ class enviarMensajes():
         for key, value in self.timerChequearStatus.items():
             if ((time.time() - value) > TIME_BETWEEN_POI_PING):
                 self.nextState = CHEQUEAR_STATUS_MISION
-                return dict({"ip":key,"state":self.nextState})
+                return dict({"ip": key, "state": self.nextState})
         return None
 
     def isAsignarPOI(self):
-        for poi in POIPositions:
+        for poi in self.POIPositions:
             if time.time() - self.bebop.search_map[poi[0]][poi[1]] > POI_VIGILAR_EPSILON:
                 return poi
         return None

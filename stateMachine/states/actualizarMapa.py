@@ -1,7 +1,8 @@
 from stateMachine.statesEnum import ENVIAR_MENSAJES
 
+
 class actualizarMapa():
-    def __init__(self, bebop, dataBuffer, previousState,timerDrones, messages):
+    def __init__(self, bebop, dataBuffer, previousState, timerDrones, messages):
         self.nextState = ENVIAR_MENSAJES
         self.bebop = bebop
         self.timerDrones = timerDrones
@@ -17,7 +18,6 @@ class actualizarMapa():
             del self.timerDrones[self.bebop.ip]
         self.bebop.updateSearchMap(self.bebop.current_position)
         return self.dataBuffer
-      
+
     def handleMessage(self, message):
         self.messages.append(message)
-        
