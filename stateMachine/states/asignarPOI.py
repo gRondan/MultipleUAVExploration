@@ -1,7 +1,6 @@
-from stateMachine.statesEnum import EXPLORAR, POI_VIGILAR, POI_CRITICO, ASIGNAR_POI, CANCELAR_MISION
+from stateMachine.statesEnum import EXPLORAR, ASIGNAR_POI, CANCELAR_MISION
 from utils import cartesianDistance, createMessage
-from properties import DISTANCE_ENERGY_RATIO, LOW_BATTERY, WAIT_TIME, POI_CRITICAL_EPSILON
-import time
+from properties import DISTANCE_ENERGY_RATIO, LOW_BATTERY, WAIT_TIME
 import threading
 from connections.message_type import AVAILABLE, UNAVAILABLE, DISTANCE, RESULT, POI_ALREADY_ASSIGNED
 
@@ -10,10 +9,11 @@ class asignarPOI():
     def __init__(self, bebop, dataBuffer, previousState, client, idMessage, isAlone, messages):
         self.bebop = bebop
         self.previousState = previousState
-        self.poi = dataBuffer
+        self.poi = dataBuffer["poi"]
+        self.poiType = dataBuffer["type"]
         self.client = client
         self.isAlone - isAlone
-        self.result = 'unasign'
+        self.result = EXPLORAR
         self.messages = messages
         self.availableDrones = [elem['content'] for elem in messages if elem['message_type'] == AVAILABLE]
         self.unavailableDrones = [elem['content'] for elem in messages if elem['message_type'] == UNAVAILABLE]
@@ -27,19 +27,11 @@ class asignarPOI():
         self.idMessage = idMessage
 
     def getNextState(self):
-        if self.result == 'unasign':
-            return EXPLORAR
-        elif self.result == 'assign':
-            return POI_VIGILAR
-        elif self.result == 'critic_assign':
-            return POI_CRITICO
+        return self.result
 
     def execute(self):
         if self.isAlone:
-            if time.time() - self.bebop.search_map[self.poi[0]][self.poi[1]] > POI_CRITICAL_EPSILON:
-                self.result = 'assign'
-            else:
-                self.result = 'critic_assign'
+            self.result = self.poiType
         else:
             if len(self.poiAlreadyAssigned) > 0 and self.previousState == CANCELAR_MISION:
                 return None
@@ -53,11 +45,11 @@ class asignarPOI():
             available_battery = self.bebop.getBatteryPercentage()
 
             if available_battery - (distance / DISTANCE_ENERGY_RATIO) > LOW_BATTERY:
-                message = createMessage(ASIGNAR_POI, 'available', self.bebop.ip)
+                message = createMessage(ASIGNAR_POI, AVAILABLE, self.bebop.ip)
                 for ip in connected_drones:
                     self.client.send_message(message)
             else:
-                message = createMessage(ASIGNAR_POI, 'unavailable', self.bebop.ip)
+                message = createMessage(ASIGNAR_POI, UNAVAILABLE, self.bebop.ip)
                 for ip in connected_drones:
                     self.client.send_message(message)
                 return None
@@ -77,7 +69,7 @@ class asignarPOI():
             timer1.cancel()
             availableDronesNumber = len(self.availableDrones)
 
-            message2 = createMessage(ASIGNAR_POI, 'distance', {'ip': self.bebop.ip, 'distance': distance})
+            message2 = createMessage(ASIGNAR_POI, DISTANCE, {'ip': self.bebop.ip, 'distance': distance})
             self.messageMutex.acquire()
             for ip in self.availableDrones:
                 self.client.send_direct_message(message2, ip)
@@ -104,7 +96,7 @@ class asignarPOI():
                     minDistance = elem["distance"]
                     minIp = elem["ip"]
 
-            message3 = createMessage(asignarPOI, 'result', minIp)
+            message3 = createMessage(asignarPOI, RESULT, minIp)
             for ip in self.availableDrones:
                 self.client.send_direct_message(message3, ip)
             self.messageMutex.release()
@@ -137,10 +129,7 @@ class asignarPOI():
             self.messageMutex.release()
 
             if concensus == self.bebop.ip:
-                if time.time() - self.bebop.search_map[self.poi[0]][self.poi[1]] > POI_CRITICAL_EPSILON:
-                    self.result = 'critic_assign'
-                else:
-                    self.result = 'assign'
+                self.result = self.poiType
         return self.poi
 
     def timeout(self):
