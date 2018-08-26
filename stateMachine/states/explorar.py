@@ -1,5 +1,6 @@
 from stateMachine.states import DESPLAZARSE
 
+
 class explorar():
     def __init__(self, bebop, dataBuffer, previousState, messages):
         self.nextState = DESPLAZARSE

@@ -1,10 +1,12 @@
-from stateMachine.statesEnum import EXPLORAR, POI_VIGILAR, POI_CRITICO
+from stateMachine.statesEnum import EXPLORAR, POI_VIGILAR, POI_CRITICO, ASIGNAR_POI
 from utils import cartesianDistance, createMessage
-from properties import DISTANCE_ENERGY_RATIO, LOW_BATTERY
+from properties import DISTANCE_ENERGY_RATIO, LOW_BATTERY, WAIT_TIME, POI_CRITICAL_EPSILON
 import time
+from threading import Timer
+
 
 class asignarPOI():
-    def __init__(self, bebop, dataBuffer, previousState, messages, client):
+    def __init__(self, bebop, dataBuffer, previousState, client, messages):
         self.bebop = bebop
         self.previousState = previousState
         self.poi = dataBuffer
@@ -40,7 +42,7 @@ class asignarPOI():
                 self.client.send_message(message)
             return None
 
-        timer1 = Timer(properties.WAIT_TIME, self.timeout)
+        timer1 = Timer(WAIT_TIME, self.timeout)
         timer1.start()
         while len(self.availableDrones) + len(self.unavailableDrones) < len(connected_drones) and not self.timeout:
             pass
@@ -52,7 +54,7 @@ class asignarPOI():
         for ip in self.availableDrones:
             self.client.send_direct_message(message2, ip)
 
-        timer2 = Timer(properties.WAIT_TIME, self.timeout)
+        timer2 = Timer(WAIT_TIME, self.timeout)
         timer2.start()
         while len(self.availableDistances) < availableDronesNumber and not self.timeout:
             pass
@@ -62,15 +64,15 @@ class asignarPOI():
         minDistance = distance
         minIp = self.bebop.ip
         for elem in self.availableDistances:
-            if d["distance"] < minDistance:
-                minDistance = d["distance"]
-                minIp = d["ip"]
+            if elem["distance"] < minDistance:
+                minDistance = elem["distance"]
+                minIp = elem["ip"]
 
         message3 = createMessage(asignarPOI, 'result', minIp)
         for ip in self.availableDrones:
             self.client.send_direct_message(message3, ip)
 
-        timer3 = Timer(properties.WAIT_TIME, self.timeout)
+        timer3 = Timer(WAIT_TIME, self.timeout)
         timer3.start()
         while len(self.availableResults) < len(self.availableDrones) and not self.timeout:
             pass
@@ -82,21 +84,21 @@ class asignarPOI():
         for ip in self.availableDrones:
             count = 0
             for elem in self.availableResults:
-                if elem == ip :
+                if elem == ip:
                     count += 1
             if count > concensusValue:
                 concensusValue = count
                 concensus = ip
 
         if concensus == self.bebop.ip:
-            if time.time() - self.bebop.search_map[self.poi[0]][self.poi[1]] > properties.POI_CRITICAL_EPSILON:
+            if time.time() - self.bebop.search_map[self.poi[0]][self.poi[1]] > POI_CRITICAL_EPSILON:
                 self.result = 'asign_critical'
             else:
                 self.result = 'asign'
 
         return self.poi
 
-    def timeout():
+    def timeout(self):
         self.timeout = True
 
     def handleMessage(self, message):

@@ -1,13 +1,14 @@
-from stateMachine.statesEnum import ENVIAR_MENSAJES, DESPLAZARSE
+from stateMachine.statesEnum import DESPLAZARSE
+
 
 class POIVigilar():
-	 def __init__(self, bebop, dataBuffer, previousState, messages):
+    def __init__(self, bebop, dataBuffer, previousState, messages):
         self.nextState = DESPLAZARSE
         self.bebop = bebop
         self.previousState = previousState
-		    self.messages = messages
+        self.messages = messages
 
-    def getNextState():
+    def getNextState(self):
         return self.nextState
 
     def execute(self):

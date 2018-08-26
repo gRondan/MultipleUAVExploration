@@ -1,8 +1,8 @@
 from stateMachine.states import ATERRIZAR, CANCELAR_MISION, DESPLAZARSE_SIN_CONEXION, BATERIA_CRITICA, BATERIA_BAJA
-from batteryEnum import LOW, CRITICAL, NORMAL
+from batteryEnum import LOW, CRITICAL
 
 
-class sinConexion():
+class pingSinConexion():
     def __init__(self, bebop, dataBuffer, previousState, client, message):
         self.bebop = bebop
         self.previousState = previousState
