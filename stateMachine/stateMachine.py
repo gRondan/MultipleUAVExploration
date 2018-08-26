@@ -56,7 +56,7 @@ class stateMachine():
                 # previousState = currentState;
                 # currentState = explorarState.getNextState()
             elif self.currentState == ASIGNAR_POI:
-                self.state = asignarPOI(self.bebop, self.dataBuffer, self.previousState, self.client, self.messages[self.currentState])
+                self.state = asignarPOI(self.bebop, self.dataBuffer, self.previousState, self.client, self.idMessage, self.messages[self.currentState])
                 startTime = time.time()
                 startTime.start()
                 self.assignedPOIs[self.dataBuffer] = startTime
