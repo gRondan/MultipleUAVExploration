@@ -48,7 +48,7 @@ class stateMachine():
                 # previousState = currentState;
                 # currentState = explorarState.getNextState()
             elif self.currentState == ASIGNAR_POI:
-                self.state = asignarPOI(self.bebop, self.dataBuffer, self.previousState, self.messages[self.currentState], self.client)
+                self.state = asignarPOI(self.bebop, self.dataBuffer, self.previousState, self.client, self.messages[self.currentState])
                 startTime = time.time()
                 startTime.start()
                 self.timerDrones[self.dataBuffer] = startTime
@@ -66,11 +66,8 @@ class stateMachine():
                 # desplazarseState.execute()
                 # currentState = desplazarseState.getNextState()
             elif self.currentState == ACTUALIZAR_MAPA:
-                self.state = actualizarMapa(self.bebop, self.dataBuffer, self.previousState, self.messages[self.currentState], self.timerDrones)
+                self.state = actualizarMapa(self.bebop, self.dataBuffer, self.previousState, self.timerDrones, self.messages[self.currentState])
 
-                # currentState = actualizarMapaState.getNextState()
-            elif self.currentState == ENVIAR_MENSAJES:
-                a = 5
                 # currentState = actualizarMapaState.getNextState()
             elif self.currentState == ENVIAR_MENSAJES:
                 self.state = enviarMensajes(self.bebop, self.dataBuffer, self.client, self.timerDrones, self.endMision, self.POIPositions, self.messages[self.currentState])
@@ -103,7 +100,7 @@ class stateMachine():
 
                 # currentState = cancelarMisionState.getNextState()
             elif self.currentState == SIN_CONEXION:
-                self.state = sinConexion(self.bebop, self.dataBuffer, self.previousState, self.messages[self.currentState], self.client)
+                self.state = sinConexion(self.bebop, self.dataBuffer, self.previousState, self.client, self.messages[self.currentState])
 
                 # currentState = sinConexionState.getNextState()
             elif self.currentState == FIN:
