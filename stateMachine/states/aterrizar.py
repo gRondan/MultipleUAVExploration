@@ -1,7 +1,7 @@
 from stateMachine.statesEnum import DESPLAZARSE, DESPEGAR, CARGAR
 
 class aterrizar():
-    def __init__(self, bebop, dataBuffer, messages, previousState):
+    def __init__(self, bebop, dataBuffer, previousState, messages):
         self.bebop = bebop
         self.previousState = previousState
         self.dataBuffer = dataBuffer

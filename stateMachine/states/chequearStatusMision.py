@@ -5,7 +5,7 @@ from utils import createMessage
 import time
 
 class chequearStatusMision():
-    def __init__(self, bebop, dataBuffer, previousState, messages, client, timerChequearStatus):
+    def __init__(self, bebop, dataBuffer, previousState, client, timerChequearStatus, messages):
         self.ip = dataBuffer["ip"]
         self.messages = messages
         self.client = client
