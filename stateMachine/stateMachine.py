@@ -10,7 +10,7 @@ import time
 
 class stateMachine():
 
-    def __init__(self, home, initPoiPosition):
+    def __init__(self, home, initPoiPosition, POIPositions):
         self.initPoiPosition = initPoiPosition
         self.home = home
         self.dataBuffer = home
@@ -22,6 +22,7 @@ class stateMachine():
         self.client = None
         self.endMision = False
         self.timerDrones = {}
+        self.POIPositions = POIPositions
 
     def execute(self):
         endExecutionTimer = Timer(TIMEOUT, self.isEndMision)
@@ -67,7 +68,7 @@ class stateMachine():
 
                 # currentState = actualizarMapaState.getNextState()
             elif currentState == ENVIAR_MENSAJES:
-                self.state = enviarMensajes(self.bebop, self.dataBuffer, self.client, self.timerDrones, self.endMision)
+                self.state = enviarMensajes(self.bebop, self.dataBuffer, self.client, self.timerDrones, self.endMision, self.POIPositions)
 
                 # currentState = enviarMensajesState.getNextState()
             elif currentState == POI_VIGILAR:
