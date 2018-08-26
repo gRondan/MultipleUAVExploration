@@ -12,7 +12,7 @@ class asignarPOI():
         self.poi = dataBuffer["poi"]
         self.poiType = dataBuffer["type"]
         self.client = client
-        self.isAlone - isAlone
+        self.isAlone = isAlone
         self.result = EXPLORAR
         self.messages = messages
         self.availableDrones = [elem['content'] for elem in messages if elem['message_type'] == AVAILABLE]

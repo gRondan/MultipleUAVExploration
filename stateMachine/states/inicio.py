@@ -7,7 +7,7 @@ from connections.message_type import SYNC
 
 
 class inicio():
-    def __init__(self, bebop, home, previousState, messages, setTimerFunc):
+    def __init__(self, bebop, home, previousState, setTimerFunc, messages):
         self.nextState = DESPEGAR
         self.bebop = bebop
         self.home = home
@@ -29,7 +29,7 @@ class inicio():
 
         if not self.awoken:
             message = createMessage(INICIO, SYNC, 'wake up!')
-            self.client.send_message(message)
+            client1.send_message(message)
         for i in range(len(POI_POSITIONS)):
             new_timer = Timer(POI_TIMERS[i], self.setTimerFunc, (POI_POSITIONS[i],))
             new_timer.start()
