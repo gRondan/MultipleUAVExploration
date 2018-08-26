@@ -1,13 +1,21 @@
-class cancelarMision():
-    def __init__(self, messages):
-        self.messages = messages
-    def getNextState():
+from stateMachine.statesEnum import ASIGNAR_POI, CANCELAR_MISION
+from connections import client
+from utils import createMessage
+from connections.message_type import MISSION_ABORTED
 
-        if cancelarMisionTransitions.isBateriaBaja():
-            actualState = BATERIA_BAJA
-        elif cancelarMisionTransitions.isBateriaCritica():
-            actualState = BATERIA_CRITICA
-        elif cancelarMisionTransitions.isExplorar():
-            actualState = EXPLORAR
+class cancelarMision():
+    def __init__(self, bebop, dataBuffer, previousState, messages):
+        self.bebop = bebop
+        self.client = dataBuffer
+        self.messages = messages
+
+    def getNextState(self):
+        return ASIGNAR_POI
+
+
+    def execute(self):
+        self.client.send_message(createMessage(CANCELAR_MISION, MISSION_ABORTED, self.bebop.ip))
+        return None
+
     def handleMessage(self, message):
         self.messages.append(message)

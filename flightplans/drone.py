@@ -9,21 +9,21 @@ import random
 import time
 
 class drone:
-    def __init__(self):
+    def __init__(self, ip):
         self.rango_largo = properties.RANGO_LARGO
         self.rango_ancho = properties.RANGO_ANCHO
         self.mapa_largo = properties.MAPA_LARGO/self.rango_largo
         self.mapa_ancho = properties.MAPA_ANCHO/self.rango_ancho
+        self.ip = ip
         self.search_map = [[0 for j in range(int(self.mapa_largo))]for i in range(int(self.mapa_ancho))]
         self.current_position = home
-        self.battery_status = NORMAL
         self.mutex_search_map = threading.Lock()
         self.bebop = Bebop()
-        self.initialize()
 
     def initialize(self, home):
         self.search_map[self.home[0]][self.home[1]] = 1
         self.home = home
+        self.poi_position = None
         success = self.bebop.connect(10)
         print(success)
         self.bebop.ask_for_state_update()
@@ -45,8 +45,10 @@ class drone:
         utils.printMatrix(self.search_map)
         self.mutex_search_map.release()
 
-    def explore(self, poi_position):
+    def setPoiPosition(self, poiPosition):
+        self.poi_position = poiPosition
 
+    def explore(self, forcePosition):
         #self.updateSearchMap(self.current_position)
         exitloop = False
         firstTime = True
@@ -57,7 +59,7 @@ class drone:
             for x2 in range(-1,2):
                 x3 = x+x2
                 y3 = y+y2
-                if self.validatePosition(x3, y3, poi_position):
+                if self.validatePosition(x3, y3, forcePosition):
                     if firstTime:
                         self.mutex_search_map.acquire()
                         val = self.search_map[x3][y3]
@@ -88,21 +90,23 @@ class drone:
             selected = random.randint(0, lenght-1)
             return best_values[selected]
 
-    def validatePosition(self, x3, y3, poi_position):
+    def validatePosition(self, x3, y3, forcePosition):
         condition = x3>=0 and y3>= 0 and x3<self.mapa_ancho and y3<self.mapa_largo
-        if poi_position != None:
-            tupla = (x3,y3)
-            distance2 = self.calculateDistance(poi_position, self.current_position)
-            distance1 = self.calculateDistance(poi_position, tupla)
-            return (condition and ( distance1 < distance2 ))
-        elif self.battery_status == NORMAL:
+        tupla = (x3,y3)
+        if (forcePosition != None):
+            return (condition and self.minDistanceToTarget(self.home, self.current_position, tupla))
+        elif self.poi_position != None:
+            return (condition and self.minDistanceToTarget(self.poi_position, self.current_position, tupla))
+        elif self.checkBatteryStatus() == NORMAL:
             return condition
         else:
-            tupla = (x3,y3)
-            distance2 = self.calculateDistance(self.home, self.current_position)
-            distance1 = self.calculateDistance(self.home, tupla)
-            print("distance1: "+str(distance1)+ " distance2: "+ str(distance2))
-            return (condition and ( distance1 < distance2 ))
+            return (condition and self.minDistanceToTarget(self.home, self.current_position, tupla))
+
+    def minDistanceToTarget(target, positionA, positionB):
+        distance2 = self.calculateDistance(target, positionA)
+        distance1 = self.calculateDistance(target, positionB)
+        print("distance1: "+str(distance1)+ " distance2: "+ str(distance2))
+        return (distance1 < distance2 )
 
     def calculateDistance(self, tuple1, tuple2):
         return math.sqrt((tuple2[1] - tuple1[1])**2 + (tuple2[0] - tuple1[0])**2)
@@ -112,24 +116,14 @@ class drone:
         self.search_map[tupla[0]][tupla[1]] +=1
         self.mutex_search_map.release()
 
-    def getBatteryPercentage():
-        return NORMAL
-
-
-    def actualizarPosicion(self):
-        status = self.checkBatteryStatus()
-        self.battery_status = status
-
-        if status != CRITICAL:
-            self.explore()
-        else:
-            self.goHome()
+    def getBatteryPercentage(self):
+        return self.bebop.sensors.battery
 
     def checkBatteryStatus(self):
         batteryPercentage = self.getBatteryPercentage()
-        if  batteryPercentage < 5:
+        if batteryPercentage < 5:
             return CRITICAL
-        elif  batteryPercentage < 10:
+        elif batteryPercentage < 10:
             return LOW
         else:
             return NORMAL

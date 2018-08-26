@@ -25,3 +25,6 @@ def convertStringToTuple(message):
 
 def cartesianDistance(tuple1, tuple2):
     return math.sqrt((tuple2[1] - tuple1[1])**2 + (tuple2[0] - tuple1[0])**2)
+  
+def createMessage(state, message_type, message_content):
+    return dict({"state":state, "message_type":message_type, "content":message_content})

@@ -4,15 +4,14 @@ class POIVigilar():
 	 def __init__(self, bebop, dataBuffer, previousState, messages):
         self.nextState = DESPLAZARSE
         self.bebop = bebop
-        self.poi_position = dataBuffer
         self.previousState = previousState
-		self.messages = messages
+		    self.messages = messages
 
     def getNextState():
         return self.nextState
 
     def execute(self):
-        return self.bebop.explore(self.poi_position)
+        return self.bebop.explore()
 
     def handleMessage(self, message):
         self.messages.append(message)
