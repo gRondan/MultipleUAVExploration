@@ -9,21 +9,22 @@ import time
 
 
 class drone:
-    def __init__(self, home, ip):
+    def __init__(self, home):
         self.rango_largo = properties.RANGO_LARGO
         self.rango_ancho = properties.RANGO_ANCHO
         self.mapa_largo = properties.MAPA_LARGO / self.rango_largo
         self.mapa_ancho = properties.MAPA_ANCHO / self.rango_ancho
-        self.ip = ip
+        self.ip = None
         self.search_map = [[0 for j in range(int(self.mapa_largo))]for i in range(int(self.mapa_ancho))]
         self.current_position = home
         self.mutex_search_map = threading.Lock()
+        self.poi_position = None
+        self.home = home
         self.bebop = Bebop()
 
-    def initialize(self, home):
+    def initialize(self, ip):
         self.search_map[self.home[0]][self.home[1]] = 1
-        self.home = home
-        self.poi_position = None
+        self.ip = ip
         success = self.bebop.connect(10)
         print(success)
         self.bebop.ask_for_state_update()
@@ -37,7 +38,7 @@ class drone:
     def move(self, new_position):
         dx, dy = new_position[0] - self.current_position[0], new_position[1] - self.current_position[1]
         real_dx, real_dy = dx * self.rango_ancho, dy * self.rango_largo
-        self.bebop.move_relative(real_dx, real_dy, 0, 0)
+        #self.bebop.move_relative(real_dx, real_dy, 0, 0)
         time.sleep(2)
         self.current_position = new_position
         self.updateSearchMap(self.current_position)
@@ -80,6 +81,7 @@ class drone:
 
     def selectBestValue(self, best_values):
         lenght = len(best_values)
+        print("selectBestValue: " + str(lenght))
         if(lenght == 1):
             return best_values[0]
         else:
@@ -99,10 +101,11 @@ class drone:
             return (condition and self.minDistanceToTarget(self.home, self.current_position, tupla))
 
     def minDistanceToTarget(self, target, positionA, positionB):
+        print("minDistanceToTarget")
         distance2 = self.calculateDistance(target, positionA)
         distance1 = self.calculateDistance(target, positionB)
         print("distance1: " + str(distance1) + " distance2: " + str(distance2))
-        return (distance1 < distance2)
+        return (distance1 <= distance2)
 
     def calculateDistance(self, tuple1, tuple2):
         return math.sqrt((tuple2[1] - tuple1[1])**2 + (tuple2[0] - tuple1[0])**2)

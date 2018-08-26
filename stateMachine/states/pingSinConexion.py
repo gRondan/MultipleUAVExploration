@@ -7,7 +7,7 @@ class pingSinConexion():
         self.bebop = bebop
         self.previousState = previousState
         self.client = client
-        cont = self.client.check_friends()
+        cont = len(self.client.check_friends())
         self.isConnected = cont > 0
         self.message = message
 

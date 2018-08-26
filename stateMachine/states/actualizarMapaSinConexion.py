@@ -5,7 +5,7 @@ import utils
 
 
 class actualizarMapaSinConexion():
-    def __init__(self, bebop, dataBuffer, previousState):
+    def __init__(self, bebop, dataBuffer, previousState, message):
         self.nextState = PING_SIN_CONEXION
         self.bebop = bebop
         self.previousState = previousState

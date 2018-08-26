@@ -23,6 +23,7 @@ class despegar():
         return nextState
 
     def execute(self):
+        self.bebop.take_off()
         if self.poiPosition is not None:
             return self.poiPosition
         else:

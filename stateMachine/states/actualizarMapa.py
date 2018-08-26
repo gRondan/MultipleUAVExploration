@@ -15,7 +15,7 @@ class actualizarMapa():
 
     def execute(self):
         if (self.bebop.poi_position == self.bebop.home):
-            del self.timerDrones[self.bebop.ip]
+            del self.timerDrones[self.bebop.poi_position]
         self.bebop.updateSearchMap(self.bebop.current_position)
         return self.dataBuffer
 

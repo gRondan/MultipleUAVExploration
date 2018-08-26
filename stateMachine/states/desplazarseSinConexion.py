@@ -1,8 +1,8 @@
 from stateMachine.statesEnum import ACTUALIZAR_MAPA_SIN_CONEXION, ATERRIZAR
 
 
-class desplazarse():
-    def __init__(self, bebop, dataBuffer, previousState):
+class desplazarseSinConexion():
+    def __init__(self, bebop, dataBuffer, previousState, message):
         self.previousState = previousState
         self.bebop = bebop
         self.client = dataBuffer
