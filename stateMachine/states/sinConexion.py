@@ -23,4 +23,11 @@ class sinConexion():
                 return BATERIA_BAJA
 
     def execute(self):
+        disconnected = True
+        while self.bebop.current_position != self.bebop.home and disconnected:
+            new_coordinate = self.bebop.getNewCoordinate()
+            self.bebop.move(new_coordinate)
+            cont = self.client.check_friends()
+            if len(cont) > 0:
+                disconnected = False
         return self.client

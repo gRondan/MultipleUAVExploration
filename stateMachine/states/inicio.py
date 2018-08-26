@@ -5,10 +5,11 @@ from connections import client
 import threading
 
 class inicio():
-    def __init__(self, bebop, home, previousState):
+    def __init__(self, bebop, home, previousState, messages):
         self.nextState = DESPEGAR
         self.bebop = bebop
         self.home = home
+        self.messages = messages
 
     def getNextState(self):
         return self.nextState
@@ -26,3 +27,6 @@ class inicio():
         client_handler.start()
         client = client.client()
         client.search_friends(my_ip)
+
+    def handleMessage(self, message):
+        self.messages.append(message)

@@ -7,6 +7,7 @@ from subprocess import Popen, PIPE
 from flightplans import drone
 import utils
 import time
+import json
 
 #CONSTANTS
 port = properties.PORT
@@ -30,11 +31,11 @@ class client:
         return toping.returncode
 
     def check_friends(self):
-        cont = 0
+        cont = []
         for ip in self.friends:
             status = self.check_connection(ip)
             if status == 0:
-                cont += 1
+                cont.append(ip)
         return cont
 
     def search_friends(self, my_ip):
@@ -63,7 +64,8 @@ class client:
 
 
     def send_message(self, msj):
-        def send_message_thread(self, msj):
+        def send_message_thread(self, msj_dict):
+            msj = json.dumps(msj_dict)
             for ip in self.friends:
                 ip = str(ip)
                 hostalive = self.check_connection(ip)
@@ -80,6 +82,27 @@ class client:
         handler = threading.Thread(
             target=send_message_thread,
             args=(self, msj,)
+        )
+        handler.start
+
+    def send_direct_message(self, msj, ip):
+        def send_message_thread(self, msj_dict,ip):
+            msj = json.dumps(msj_dict)
+            ip = str(ip)
+            hostalive = self.check_connection(ip)
+            if hostalive == 0:
+                print(ip, 'enviado mensaje')
+                self.client_request(ip,msj)
+            else:
+                print(ip, 'no se encontro el dron')
+                handler = threading.Thread(
+                    target=self.reconect,
+                    args=(msj,ip)
+                )
+                handler.start()
+        handler = threading.Thread(
+            target=send_message_thread,
+            args=(self, msj,ip,)
         )
         handler.start
 

@@ -1,3 +1,5 @@
+import math
+
 def printMatrix(matrix):
     s = [[str(e) for e in row] for row in matrix]
     lens = [max(map(len, col)) for col in zip(*s)]
@@ -21,5 +23,8 @@ def convertStringToTuple(message):
         tupla.append(int(i))
     return tuple(tupla)
 
+def cartesianDistance(tuple1, tuple2):
+    return math.sqrt((tuple2[1] - tuple1[1])**2 + (tuple2[0] - tuple1[0])**2)
+  
 def createMessage(state, message_type, message_content):
     return dict({"state":state, "message_type":message_type, "content":message_content})
