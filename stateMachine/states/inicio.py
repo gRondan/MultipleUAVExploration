@@ -1,5 +1,5 @@
 from stateMachine.statesEnum import DESPEGAR
-from connections import connections
+from connections import server
 from connections import client
 import threading
 
@@ -19,9 +19,10 @@ class inicio():
         return self.processConections()
 
     def processConections(self):
-        my_ip = connections.get_server_ip()
+        my_ip = server.get_server_ip()
+        self.bebop.ip = my_ip
         client_handler = threading.Thread(
-            target=connections.run_server,
+            target=server.run_server,
             args=(my_ip, self.bebop,)
         )
         client_handler.start()
