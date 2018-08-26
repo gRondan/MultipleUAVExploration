@@ -1,4 +1,4 @@
-from stateMachine.statesEnum import ASIGNAR_POI, CANCELAR_MISION
+from stateMachine.statesEnum import ASIGNAR_POI, GENERAL
 from utils import createMessage
 from connections.message_type import MISSION_ABORTED
 
@@ -13,7 +13,7 @@ class cancelarMision():
         return ASIGNAR_POI
 
     def execute(self):
-        self.client.send_message(createMessage(CANCELAR_MISION, MISSION_ABORTED, self.bebop.ip))
+        self.client.send_message(createMessage(GENERAL, MISSION_ABORTED, dict({"ip": self.bebop.ip, "poi": self.bebop.poi_position})))
         return None
 
     def handleMessage(self, message):
