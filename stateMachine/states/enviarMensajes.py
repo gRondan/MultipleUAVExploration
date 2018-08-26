@@ -1,6 +1,6 @@
 from flightplans import drone
 from stateMachine.statesEnum import CHEQUEAR_STATUS_MISION, DESPLAZARSE_SIN_CONEXION, MISION_FINALIZADA
-from utils import createMessage
+from utils import createMessage, convertTupleToString
 from properties import TIME_BETWEEN_POI_PING, POI_CRITICAL_EPSILON
 import time
 
@@ -28,10 +28,11 @@ class enviarMensajes():
             else:
                 self.nextState = DESPLAZARSE_SIN_CONEXION
                 return client
-        poi = self.isAsignarPOI()
-        if poi == None:
-            return self.isChequearMision()
-        return poi
+            poi = self.isAsignarPOI()
+            if poi == None:
+                return self.isChequearMision()
+            return poi
+        return None
 
     def isChequearMision(self):
         for key, value in self.timerChequearStatus.items():
