@@ -157,7 +157,6 @@ class Pathfinder:
 
 	def setParentAndRecalculateFactors(self, node, adyacent, newG):
 		adyacentNode = self.completeMap[adyacent["x"]][adyacent["y"]]
-		# print("DAD TO ASSIGN: " + str(self.completeMap[node["x"]][node["y"]]))
 		adyacentNode["dad"] = self.completeMap[node["x"]][node["y"]]
 		adyacentNode["g"] = newG
 		adyacentNode["h"] = self.manhattanDistance(adyacent, self.completeMap[self.target[0]][self.target[1]]) * 10
