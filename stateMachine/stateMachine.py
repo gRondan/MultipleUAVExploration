@@ -43,7 +43,7 @@ class stateMachine():
         while not self.end:
             print("currentState: " + str(self.currentState))
             if self.currentState == INICIO:
-                self.state = inicio.inicio(self.bebop, self.dataBuffer, self.previousState, self.messages[self.currentState])
+                self.state = inicio.inicio(self.bebop, self.dataBuffer, self.previousState, self.poiVigilarTimeout, self.messages[self.currentState])
                 # inicioState.execute()
                 # currentState = inicioState.getNextState()
             elif self.currentState == DESPEGAR:
@@ -57,10 +57,10 @@ class stateMachine():
                 # previousState = currentState;
                 # currentState = explorarState.getNextState()
             elif self.currentState == ASIGNAR_POI:
-                self.state = asignarPOI.asignarPOI(self.bebop, self.dataBuffer, self.previousState, self.client, self.idMessage, self.messages[self.currentState])
+                self.state = asignarPOI.asignarPOI(self.bebop, self.dataBuffer, self.previousState, self.client, self.idMessage, self.isAlone, self.messages[self.currentState])
                 startTime = time.time()
-                startTime.start()
                 self.assignedPOIs[self.dataBuffer] = startTime
+                #TODO: USAR TIMER EN LUGAR DE TIME
                 # currentState = asignarPOIState.getNextState()
             elif self.currentState == BATERIA_BAJA:
                 self.state = bateriaBaja.bateriaBaja(self.bebop, self.dataBuffer, self.previousState, self.messages[self.currentState])
@@ -75,7 +75,7 @@ class stateMachine():
                 # desplazarseState.execute()
                 # currentState = desplazarseState.getNextState()
             elif self.currentState == ACTUALIZAR_MAPA:
-                self.state = actualizarMapa.actualizarMapa(self.bebop, self.dataBuffer, self.previousState, self.assignedPOIs, self.messages[self.currentState])
+                self.state = actualizarMapa.actualizarMapa(self.bebop, self.dataBuffer, self.previousState, self.assignedPOIs, self.poiVigilarTimeout, self.messages[self.currentState])
 
                 # currentState = actualizarMapaState.getNextState()
             elif self.currentState == ENVIAR_MENSAJES:
@@ -91,7 +91,7 @@ class stateMachine():
 
                 # currentState = POICriticoState.getNextState()
             elif self.currentState == CHEQUEAR_STATUS_MISION:
-                self.state = chequearStatus.chequearStatus(self.bebop, self.dataBuffer, self.previousState, self.messages[self.currentState])
+                self.state = chequearStatusMision.chequearStatusMision(self.bebop, self.dataBuffer, self.previousState, self.messages[self.currentState])
                 self.chequearMision = False
                 t = Timer(TIME_BETWEEN_POI_PING, self.isChequearMision)
                 t.start()
@@ -157,3 +157,18 @@ class stateMachine():
                 self.POIsToAssign.append(poi)
             else:
                 self.client.send_direct_message(createMessage(ASIGNAR_POI, POI_ALREADY_ASSIGNED, "go back to explore"), ipDron)
+
+    def poiVigilarTimeout(self, poi):
+        self.poisVigilar.append(poi)
+        poiCriticoTimer = Timer(TIMEOUT, self.poiCriticoTimeout, poi)
+        poiCriticoTimer.start()
+
+    def poiCriticoTimeout(self, poi):
+        encontre = False
+        for poiVigilar in self.poisVigilar:
+            if poiVigilar == poi:
+                encontre = True
+                break
+        if encontre:
+            self.poisVigilar.remove(poi)
+            self.poiCriticoTimeout.append(poi)

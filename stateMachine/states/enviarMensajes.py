@@ -1,4 +1,4 @@
-from stateMachine.statesEnum import CHEQUEAR_STATUS_MISION, DESPLAZARSE_SIN_CONEXION, MISION_FINALIZADA, GENERAL, BATERIA_BAJA, BATERIA_CRITICA
+from stateMachine.statesEnum import CHEQUEAR_STATUS_MISION, DESPLAZARSE_SIN_CONEXION, MISION_FINALIZADA, GENERAL, BATERIA_BAJA, BATERIA_CRITICA, POI_CRITICO, POI_VIGILAR
 from batteryEnum import CRITICAL, LOW, NORMAL
 from utils import createMessage
 from connections.message_type import UPDATE_MAP
@@ -8,7 +8,7 @@ import utils
 
 
 class enviarMensajes():
-    def __init__(self, bebop, dataBuffer, client, timerChequearStatus, timeout, POIPositions, isAlone, messages):
+    def __init__(self, bebop, dataBuffer, client, timerChequearStatus, timeout, POIPositions, isAlone, poisVigilar, poisCritico, messages):
         self.bebop = bebop
         self.nextState = dataBuffer
         self.client = client
@@ -16,6 +16,8 @@ class enviarMensajes():
         self.timeout = timeout
         self.POIPositions = POIPositions
         self.isAlone = isAlone
+        self.poisVigilar = poisVigilar
+        self.poisCritico = poisCritico
 
     def getNextState(self):
         nextState = None
@@ -47,10 +49,14 @@ class enviarMensajes():
         return None
 
     def isAsignarPOI(self):
-        for poi in self.POIPositions:
-            if time.time() - self.bebop.search_map[poi[0]][poi[1]] > POI_EPSILON:
-                return poi
-        return None
+        result = None
+        if len(self.poisCritico) > 0:
+            result = dict({"poi": self.poisCritico[0], "type": POI_CRITICO})
+            self.poisCritico.remove(result)
+        elif len(self.poisVigilar) > 0:
+            result = dict({"poi": self.poisVigilar[0], "type": POI_VIGILAR})
+            self.poisVigilar.remove(result)
+        return result
 
     def handleMessage(self, message):
         self.messages.append(message)
