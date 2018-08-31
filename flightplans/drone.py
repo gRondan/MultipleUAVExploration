@@ -152,44 +152,14 @@ class drone:
         position = (x1, x2)
         return position
 
-    def goToPOICritico(self, poiPosition):
-        arrivedToPOI = False
-        while not arrivedToPOI:
-            foundPosition = False
-            position = None
-            iterations = 0
-            while (not foundPosition and iterations < 8):
-                iterations = iterations + 1
-                position = self.getClosestPositionToTarget(poiPosition)
-                if not self.pointIsObstacule(self.search_map[position[0]], self.search_map[position[1]]):
-                    foundPosition = True
-                else:
-                    self.moveToAvoidObstacule(position, poiPosition)
-            if foundPosition:
-                self.movePOICritico(position)
-            else:
+
+    def moveToPoiCritico(self, path):
+        for i in range(len(path)):
+            nextPosition = path[i]
+            self.moveNextPositionPOICritico(nextPosition)
 
 
-    def moveToAvoidObstacule(self, obstacle, target):
-        foundPointToMove = False
-        discarded
-        while not foundPointToMove:
-            pointToMove = self.current_position
-            if (target[0] > pointToMove[0]):
-                if self.pointIsObstacule(pointToMove[0] + 1, pointToMove[1]):
-                    if (target[1] > pointToMove[1]):
-                        if self.pointIsObstacule(pointToMove[0], pointToMove[1] + 1):
-                            
-
-                else:
-                    pointToMove[0] = pointToMove[0] + 1
-
-                pointToMove[0] = pointToMove[0] + 1
-            elif (target[0] < pointToMove[1]):
-                pointToMove[0] = pointToMove[0] - 1
-            if
-
-    def movePOICritico(self, new_position):
+    def moveNextPositionPOICritico(self, new_position):
         dx, dy = new_position[0] - self.current_position[0], new_position[1] - self.current_position[1]
         real_dx, real_dy = dx * self.rango_ancho, dy * self.rango_largo
         self.bebop.move_relative(real_dx, real_dy, 0, 0)

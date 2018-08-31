@@ -187,6 +187,14 @@ class Pathfinder:
 		print(caminoResultante)
 
 
+	def parsePathToCoordinates(self, pathList):
+		parsedPath = []
+		for i in range(len(pathList)):
+			coordinate = (pathList[i]["x"], pathList[i]["y"])
+			parsedPath.append(coordinate)
+		return parsedPath
+
+
 	def findPath(self):
 		openList = [self.completeMap[self.init[0]][self.init[1]]]
 		closedList = []

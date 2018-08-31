@@ -1,4 +1,5 @@
 from stateMachine.statesEnum import ACTUALIZAR_MAPA
+from algoritmo_aster import Pathfinder
 
 
 class POICritico():
@@ -12,7 +13,11 @@ class POICritico():
         return self.nextState
 
     def execute(self):
-        self.bebop.move(self.position_poi)
+        initialPosition = self.bebop.current_position
+        finalPosition = self.position_poi
+        pathfinder = Pathfinder(initialPosition, finalPosition)
+        pathToFollow = pathfinder.findPath()
+        self.bebop.moveToPoiCritico(pathfinder.parsePathToCoordinates(pathToFollow))
         return self.position_poi
 
     def handleMessage(self, message):
