@@ -8,7 +8,7 @@ from stateMachine.states import (actualizarMapaSinConexion, actualizarMapa,
 asignarPOI, aterrizar, bateriaBaja, bateriaCritica, cancelarMision, chequearStatusMision,
 despegar, desplazarse, enviarMensajes, explorar, fin, inicio, misionFinalizada, POICritico,
 POIVigilar, pingSinConexion, cargarBateria, desplazarseSinConexion)
-from properties import TIMEOUT
+from properties import TIMEOUT, POI_CRITICO_TIMERS, POI_POSITIONS
 from utils import createMessage
 from connections.message_type import UPDATE_MAP, MISSION_ABORTED, POI_ALREADY_ASSIGNED
 import stateMachine.statesEnum as enum
@@ -56,7 +56,7 @@ class stateMachine():
                 # previousState = currentState;
                 # currentState = explorarState.getNextState()
             elif self.currentState == ASIGNAR_POI:
-                self.state = asignarPOI.asignarPOI(self.bebop, self.dataBuffer, self.previousState, self.client, self.idMessage, self.isAlone, self.assignedPOIs, self.checkMissionStatus, self.poisVigilar, self.messages[self.currentState])
+                self.state = asignarPOI.asignarPOI(self.bebop, self.dataBuffer, self.previousState, self.client, self.idMessage, self.isAlone, self.assignedPOIs, self.checkMissionStatus, self.messages[self.currentState])
                 # currentState = asignarPOIState.getNextState()
             elif self.currentState == BATERIA_BAJA:
                 self.state = bateriaBaja.bateriaBaja(self.bebop, self.dataBuffer, self.previousState, self.messages[self.currentState])
@@ -153,20 +153,22 @@ class stateMachine():
 
     def checkMissionStatus(self, poi):
         if (poi in self.assignedPOIs):
-            self.poisToCcheck[poi] = self.assignedPOIs[poi]
+            self.poisVigilar.append(poi)
 
     def poiVigilarTimeout(self, poi):
         print("poiVigilarTimeout: ", poi)
         self.poisVigilar.append(poi)
-        poiCriticoTimer = Timer(TIMEOUT, self.poiCriticoTimeout, poi)
+        print("POI_CRITICO_TIMERS[POI_POSITIONS.index(poi)] ", POI_CRITICO_TIMERS[POI_POSITIONS.index(poi)], " poi ", poi)
+        poiCriticoTimer = Timer(POI_CRITICO_TIMERS[POI_POSITIONS.index(poi)], self.poiCriticoTimeout, (poi,))
         poiCriticoTimer.start()
 
     def poiCriticoTimeout(self, poi):
+        print("poiCriticoTimeout: ", poi)
         encontre = False
-        for poiVigilar in self.poisVigilar:
-            if poiVigilar == poi:
-                encontre = True
-                break
-        if encontre:
+        if poi in self.poisVigilar:
+            encontre = True
             self.poisVigilar.remove(poi)
+        if poi in self.assignedPOIs:
+            encontre = True
+        if encontre:
             self.poisCritico.append(poi)

@@ -63,7 +63,7 @@ class drone:
                         val = self.search_map[x3][y3]
                         self.mutex_search_map.release()
                         firstTime = False
-                    print("x3: " + str(x3) + " y3: " + str(y3) + " self.mapa_ancho: " + str(self.mapa_ancho) + " self.mapa_largo: " + str(self.mapa_largo))
+                    # print("x3: " + str(x3) + " y3: " + str(y3) + " self.mapa_ancho: " + str(self.mapa_ancho) + " self.mapa_largo: " + str(self.mapa_largo))
                     self.mutex_search_map.acquire()
                     if (self.search_map[x3][y3] == val):
                         best_values.append((x3, y3))
@@ -79,7 +79,7 @@ class drone:
 
     def selectBestValue(self, best_values):
         lenght = len(best_values)
-        print("selectBestValue: " + str(lenght))
+        # print("selectBestValue: " + str(lenght))
         if(lenght == 1):
             return best_values[0]
         else:
@@ -99,10 +99,10 @@ class drone:
             return (condition and self.minDistanceToTarget(self.home, self.current_position, tupla))
 
     def minDistanceToTarget(self, target, positionA, positionB):
-        print("minDistanceToTarget")
+        # print("minDistanceToTarget")
         distance2 = self.calculateDistance(target, positionA)
         distance1 = self.calculateDistance(target, positionB)
-        print("distance1: " + str(distance1) + " distance2: " + str(distance2))
+        # print("distance1: " + str(distance1) + " distance2: " + str(distance2))
         return (distance1 <= distance2)
 
     def calculateDistance(self, tuple1, tuple2):

@@ -1,4 +1,4 @@
-from stateMachine.statesEnum import CHEQUEAR_STATUS_MISION, DESPLAZARSE_SIN_CONEXION, MISION_FINALIZADA, GENERAL, BATERIA_BAJA, BATERIA_CRITICA, POI_CRITICO, POI_VIGILAR
+from stateMachine.statesEnum import CHEQUEAR_STATUS_MISION, DESPLAZARSE_SIN_CONEXION, MISION_FINALIZADA, GENERAL, BATERIA_BAJA, BATERIA_CRITICA, POI_CRITICO, POI_VIGILAR, ASIGNAR_POI
 from batteryEnum import LOW, NORMAL
 from utils import createMessage, getClosestPOI
 from connections.message_type import UPDATE_MAP
@@ -53,16 +53,16 @@ class enviarMensajes():
             minPoi = getClosestPOI(self.bebop.current_position, self.poisCritico)
             if minPoi is None:
                 return None
-            self.nextState = POI_CRITICO
             self.poisCritico.remove(minPoi)
-            return {"poi": minPoi, "type": POI_CRITICO}
+            self.nextState = ASIGNAR_POI
+            result = {"poi": minPoi, "type": POI_CRITICO}
         elif len(self.poisVigilar) > 0:
             minPoi = getClosestPOI(self.bebop.current_position, self.poisVigilar)
             if minPoi is None:
                 return None
-            self.nextState = POI_VIGILAR
             self.poisVigilar.remove(minPoi)
-            return {"poi": minPoi, "type": POI_VIGILAR}
+            result = {"poi": minPoi, "type": POI_VIGILAR}
+            self.nextState = ASIGNAR_POI
         return result
 
     def handleMessage(self, message):

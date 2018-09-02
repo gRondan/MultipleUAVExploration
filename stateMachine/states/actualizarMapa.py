@@ -21,6 +21,7 @@ class actualizarMapa():
     def execute(self):
         current_position = self.bebop.current_position
         nextState = self.dataBuffer
+        print("ACTUALIZAR_MAPA", " self.bebop.poi_position ", self.bebop.poi_position, " current_position ", current_position)
         if (self.bebop.poi_position == current_position):
             self.bebop.poi_position = None
             poiKey = convertTupleToString(current_position)
