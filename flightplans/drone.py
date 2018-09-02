@@ -21,6 +21,7 @@ class drone:
         self.poi_position = None
         self.home = home
         self.bebop = Bebop()
+        self.obstaculos = properties.OBSTACLES
 
     def initialize(self, ip):
         self.search_map[self.home[0]][self.home[1]] = 1
@@ -105,6 +106,13 @@ class drone:
         # print("distance1: " + str(distance1) + " distance2: " + str(distance2))
         return (distance1 <= distance2)
 
+    def pointIsObstacule(x1, x2):
+        isObstacule = False
+        for obs in self.obstaculos:
+            if obs[0] == x1 and obs[1] == x2 :
+                isObstacule = True
+        return isObstacule
+
     def calculateDistance(self, tuple1, tuple2):
         return math.sqrt((tuple2[1] - tuple1[1])**2 + (tuple2[0] - tuple1[0])**2)
 
@@ -128,13 +136,33 @@ class drone:
     def goHome(self):
         self.move(self.home)
 
-    def getNewCoordinate(self, pos):
-        x1 = self.current_position[pos]
-        if self.current_position[pos] < self.home[pos]:
-            x1 = self.current_position[pos] + 1
-        elif self.current_position[pos] > self.home[pos]:
-            x1 = self.current_position[pos] - 1
-        return x1
+    def getClosestCoordinateToTarget(self, target, pos):
+        res = self.current_position[pos]
+        if res < target[pos]:
+            res = res + 1
+        elif res > target[pos]:
+            res = res - 1
+        return res
+
+    def getClosestPositionToTarget(self, target):
+        x1 = getClosestCoordinateToTarget(target, 0)
+        x2 = getClosestCoordinateToTarget(target, 1)
+        position = (x1, x2)
+        return position
+
+
+    def moveToPoiCritico(self, path):
+        for i in range(len(path)):
+            nextPosition = path[i]
+            self.moveNextPositionPOICritico(nextPosition)
+
+
+    def moveNextPositionPOICritico(self, new_position):
+        dx, dy = new_position[0] - self.current_position[0], new_position[1] - self.current_position[1]
+        real_dx, real_dy = dx * self.rango_ancho, dy * self.rango_largo
+        self.bebop.move_relative(real_dx, real_dy, 0, 0)
+        time.sleep(2)
+        self.current_position = new_position
 
     def disconnect(self):
         self.bebop.disconnect()
