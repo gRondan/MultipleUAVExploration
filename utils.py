@@ -31,5 +31,18 @@ def cartesianDistance(tuple1, tuple2):
     return math.sqrt((tuple2[1] - tuple1[1])**2 + (tuple2[0] - tuple1[0])**2)
 
 
+def getClosestPOI(current_position, pois):
+    if len(pois) == 0:
+        return None
+    minPOI = pois[0]
+    minDistance = cartesianDistance(pois[0], current_position)
+    for poi in pois:
+        distance = cartesianDistance(poi, current_position)
+        if distance < minDistance:
+            minPOI = convertStringToTuple(poi)
+            minDistance = distance
+    return minPOI
+
+
 def createMessage(state, message_type, message_content, idMessage=0):
     return dict({"state": state, "message_type": message_type, "content": message_content, "message_id": idMessage})

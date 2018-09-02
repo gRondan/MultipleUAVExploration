@@ -13,7 +13,7 @@ class bateriaBaja():
 
     def execute(self):
         self.bebop.setPoiPosition(None)
-        return self.bebop.explore()
+        return self.bebop.explore(True)
 
     def handleMessage(self, message):
         self.messages.append(message)

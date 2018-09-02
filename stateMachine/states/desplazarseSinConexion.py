@@ -14,6 +14,6 @@ class desplazarseSinConexion():
             return ACTUALIZAR_MAPA_SIN_CONEXION
 
     def execute(self):
-        newPosition = self.bebop.explore(self.bebop.home)
+        newPosition = self.bebop.explore(True)
         self.bebop.move(newPosition)
         return self.client

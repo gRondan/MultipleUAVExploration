@@ -4,12 +4,13 @@ from properties import INIT_POI_POSITION, INIT_POI_POSITION_CRITICO
 
 
 class despegar():
-    def __init__(self, bebop, dataBuffer, previousState, messages):
+    def __init__(self, bebop, dataBuffer, previousState, poisCritico, messages):
         self.poiCritico = INIT_POI_POSITION_CRITICO
         self.poiVigilar = INIT_POI_POSITION
         self.bebop = bebop
         self.isAsignarPOI = dataBuffer
         self.messages = messages
+        self.poisCritico = poisCritico
 
     def getNextState(self):
         nextState = None
@@ -28,6 +29,7 @@ class despegar():
         if self.poiVigilar is not None:
             return dict({"poi": self.poiVigilar, "type": POI_VIGILAR})
         elif self.poiCritico is not None:
+            self.poisCritico.append(self.poiCritico)
             return dict({"poi": self.poiCritico, "type": POI_CRITICO})
         return None
 
