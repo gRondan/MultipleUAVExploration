@@ -49,6 +49,7 @@ class enviarMensajes():
 
     def isAsignarPOI(self):
         result = None
+        print("isAsignarPOI ", "self.poisCritico ", self.poisCritico, " self.poisVigilar ", self.poisVigilar)
         if len(self.poisCritico) > 0:
             minPoi = getClosestPOI(self.bebop.current_position, self.poisCritico)
             if minPoi is None:

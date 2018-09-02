@@ -29,6 +29,7 @@ class actualizarMapa():
                 executionTimer = self.poiVigilarTimeoutDict[poiKey]
                 executionTimer.cancel()
                 executionTimerNew = Timer(POI_TIMERS[POI_POSITIONS.index(current_position)], self.poiVigilarTimeout, (current_position, ))
+                print("##########ACTUALIZATIMER########")
                 executionTimerNew.start()
                 self.poiVigilarTimeoutDict[poiKey] = executionTimerNew
             if current_position in self.poisVigilar:

@@ -36,6 +36,7 @@ class asignarPOI():
             self.result = self.poiType
             self.bebop.poi_position = self.poi
             print("drone ASignado: YOOOOOO")
+            self.assignedPOIs[self.poi] = self.bebop.ip
         else:
             if len(self.poiAlreadyAssigned) > 0 and self.previousState == CANCELAR_MISION:
                 return None
@@ -138,7 +139,7 @@ class asignarPOI():
             if concensus == self.bebop.ip:
                 self.result = self.poiType
                 self.bebop.poi_position = self.poi
-            self.assignedPOIs[convertTupleToString(self.poi)] = self.bebop.ip
+            self.assignedPOIs[convertTupleToString(self.poi)] = concensus
             timer2 = threading.Timer(TIME_BETWEEN_POI_PING, self.checkMissionStatus, (self.poi,))
             timer2.start()
             print("drone ASignado: ", concensus)
