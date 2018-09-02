@@ -38,10 +38,9 @@ class drone:
     def move(self, new_position):
         dx, dy = new_position[0] - self.current_position[0], new_position[1] - self.current_position[1]
         real_dx, real_dy = dx * self.rango_ancho, dy * self.rango_largo
-        #self.bebop.move_relative(real_dx, real_dy, 0, 0)
+        self.bebop.move_relative(real_dx, real_dy, 0, 0)
         time.sleep(2)
         self.current_position = new_position
-        self.updateSearchMap(self.current_position)
         self.mutex_search_map.acquire()
         utils.printMatrix(self.search_map)
         self.mutex_search_map.release()
@@ -50,7 +49,6 @@ class drone:
         self.poi_position = poiPosition
 
     def explore(self, forcePosition):
-        # self.updateSearchMap(self.current_position)
         firstTime = True
         x = self.current_position[0]
         y = self.current_position[1]

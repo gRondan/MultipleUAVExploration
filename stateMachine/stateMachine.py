@@ -8,17 +8,15 @@ from stateMachine.states import (actualizarMapaSinConexion, actualizarMapa,
 asignarPOI, aterrizar, bateriaBaja, bateriaCritica, cancelarMision, chequearStatusMision,
 despegar, desplazarse, enviarMensajes, explorar, fin, inicio, misionFinalizada, POICritico,
 POIVigilar, pingSinConexion, cargarBateria, desplazarseSinConexion)
-from properties import TIMEOUT, TIME_BETWEEN_POI_PING
-from flightplans import drone, droneTest
+from properties import TIMEOUT
 from utils import createMessage
 from connections.message_type import UPDATE_MAP, MISSION_ABORTED, POI_ALREADY_ASSIGNED
 import stateMachine.statesEnum as enum
-import time
 from threading import Timer, Lock
 
 
 class stateMachine():
-    def __init__(self, home, initPoiPosition, POIPositions, isAlone, bebop):
+    def __init__(self, home, initPoiPosition, isAlone, bebop):
         self.initPoiPosition = initPoiPosition
         self.home = home
         self.dataBuffer = home
@@ -29,13 +27,14 @@ class stateMachine():
         self.bebop = bebop
         self.client = None
         self.endMision = False
-        self.chequearMision = False
         self.messages = {i: [] for i in dir(enum) if not i.startswith('_')}
         self.assignedPOIs = {}
-        self.POIPositions = POIPositions
         self.messageMutex = Lock()
         self.idMessage = 1
+        self.poisCritico = []
+        self.poisVigilar = []
         self.isAlone = isAlone
+        self.poiVigilarTimeoutDict = {}
 
     def execute(self):
         endExecutionTimer = Timer(TIMEOUT, self.isEndMision)
@@ -43,24 +42,21 @@ class stateMachine():
         while not self.end:
             print("currentState: " + str(self.currentState))
             if self.currentState == INICIO:
-                self.state = inicio.inicio(self.bebop, self.dataBuffer, self.previousState, self.poiVigilarTimeout, self.messages[self.currentState])
-                # inicioState.execute()
+                self.state = inicio.inicio(self.bebop, self.dataBuffer, self.previousState, self.poiVigilarTimeout, self.poiVigilarTimeoutDict, self.messages[self.currentState])
+                # inicioState.execute(),
                 # currentState = inicioState.getNextState()
             elif self.currentState == DESPEGAR:
                 if self.previousState == INICIO:
                     self.client = self.dataBuffer
                     self.dataBuffer = self.initPoiPosition
-                self.state = despegar.despegar(self.bebop, self.dataBuffer, self.previousState, self.messages[self.currentState])
+                self.state = despegar.despegar(self.bebop, self.dataBuffer, self.previousState, self.poisCritico, self.messages[self.currentState])
                 # currentState = despegarState.getNextState()
             elif self.currentState == EXPLORAR:
                 self.state = explorar.explorar(self.bebop, self.dataBuffer, self.previousState, self.messages[self.currentState])
                 # previousState = currentState;
                 # currentState = explorarState.getNextState()
             elif self.currentState == ASIGNAR_POI:
-                self.state = asignarPOI.asignarPOI(self.bebop, self.dataBuffer, self.previousState, self.client, self.idMessage, self.isAlone, self.messages[self.currentState])
-                startTime = time.time()
-                self.assignedPOIs[self.dataBuffer] = startTime
-                #TODO: USAR TIMER EN LUGAR DE TIME
+                self.state = asignarPOI.asignarPOI(self.bebop, self.dataBuffer, self.previousState, self.client, self.idMessage, self.isAlone, self.assignedPOIs, self.checkMissionStatus, self.poisVigilar, self.messages[self.currentState])
                 # currentState = asignarPOIState.getNextState()
             elif self.currentState == BATERIA_BAJA:
                 self.state = bateriaBaja.bateriaBaja(self.bebop, self.dataBuffer, self.previousState, self.messages[self.currentState])
@@ -75,11 +71,11 @@ class stateMachine():
                 # desplazarseState.execute()
                 # currentState = desplazarseState.getNextState()
             elif self.currentState == ACTUALIZAR_MAPA:
-                self.state = actualizarMapa.actualizarMapa(self.bebop, self.dataBuffer, self.previousState, self.assignedPOIs, self.poiVigilarTimeout, self.messages[self.currentState])
+                self.state = actualizarMapa.actualizarMapa(self.bebop, self.dataBuffer, self.previousState, self.poisVigilar, self.poiVigilarTimeout, self.poiVigilarTimeoutDict, self.messages[self.currentState])
 
                 # currentState = actualizarMapaState.getNextState()
             elif self.currentState == ENVIAR_MENSAJES:
-                self.state = enviarMensajes.enviarMensajes(self.bebop, self.dataBuffer, self.client, self.assignedPOIs, self.endMision, self.POIPositions, self.isAlone, self.messages[self.currentState])
+                self.state = enviarMensajes.enviarMensajes(self.bebop, self.dataBuffer, self.client, self.assignedPOIs, self.endMision, self.isAlone, self.poisVigilar, self.poisCritico, self.messages[self.currentState])
 
                 # currentState = enviarMensajesState.getNextState()
             elif self.currentState == POI_VIGILAR:
@@ -91,11 +87,7 @@ class stateMachine():
 
                 # currentState = POICriticoState.getNextState()
             elif self.currentState == CHEQUEAR_STATUS_MISION:
-                self.state = chequearStatusMision.chequearStatusMision(self.bebop, self.dataBuffer, self.previousState, self.messages[self.currentState])
-                self.chequearMision = False
-                t = Timer(TIME_BETWEEN_POI_PING, self.isChequearMision)
-                t.start()
-
+                self.state = chequearStatusMision.chequearStatusMision(self.bebop, self.dataBuffer, self.previousState, self.client, self.checkMissionStatus, self.poisVigilar, self.messages[self.currentState])
                 # currentState = chequearStatusState.getNextState()
             elif self.currentState == ATERRIZAR:
                 self.state = aterrizar.aterrizar(self.bebop, self.dataBuffer, self.previousState, self.endMision, self.messages[self.currentState])
@@ -140,6 +132,7 @@ class stateMachine():
     # server related methods
     def handleMessage(self, message):
         self.messageMutex.acquire()
+        print("handleMessage: ", message)
         if message["state"] == GENERAL:
             if message["message_type"] == UPDATE_MAP:
                 self.bebop.updateSearchMap(message["content"])
@@ -158,7 +151,12 @@ class stateMachine():
             else:
                 self.client.send_direct_message(createMessage(ASIGNAR_POI, POI_ALREADY_ASSIGNED, "go back to explore"), ipDron)
 
+    def checkMissionStatus(self, poi):
+        if (poi in self.assignedPOIs):
+            self.poisToCcheck[poi] = self.assignedPOIs[poi]
+
     def poiVigilarTimeout(self, poi):
+        print("poiVigilarTimeout: ", poi)
         self.poisVigilar.append(poi)
         poiCriticoTimer = Timer(TIMEOUT, self.poiCriticoTimeout, poi)
         poiCriticoTimer.start()
@@ -171,4 +169,4 @@ class stateMachine():
                 break
         if encontre:
             self.poisVigilar.remove(poi)
-            self.poiCriticoTimeout.append(poi)
+            self.poisCritico.append(poi)

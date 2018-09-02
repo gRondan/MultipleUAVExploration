@@ -1,30 +1,37 @@
 from connections import client
 from connections.message_type import MISSION_OK
-from stateMachine.statesEnum import ASIGNAR_POI
-from utils import createMessage
-import time
+from stateMachine.statesEnum import ASIGNAR_POI, POI_CRITICO
+from utils import createMessage, convertStringToTuple, getClosestPOI
+from properties import TIME_BETWEEN_POI_PING
+import threading
 
 
 class chequearStatusMision():
-    def __init__(self, bebop, dataBuffer, previousState, client, timerChequearStatus, messages):
-        self.ip = dataBuffer["ip"]
+    def __init__(self, bebop, dataBuffer, previousState, client, checkMissionStatus, poisVigilar, messages):
         self.messages = messages
         self.client = client
-        self.nextState = dataBuffer["state"]
-        self.timerChequearStatus = timerChequearStatus
+        self.nextState = dataBuffer
+        self.poisVigilar = poisVigilar
+        self.checkMissionStatus = checkMissionStatus
 
     def getNextState(self):
         return self.nextState
 
     def execute(self):
-        result = None
-        if client.check_connection(self.ip) == 0:
-            client.send_message(createMessage(ASIGNAR_POI, MISSION_OK, "ok"))
-        else:
-            self.nextState = ASIGNAR_POI
-            result = self.ip
-        self.timerChequearStatus[self.ip] = time.time()
-        return result
+        result = []
+        for key in self.poisVigilar:
+            if client.check_connection(self.poisToCheck[key]) == 0:
+                client.send_message(createMessage(ASIGNAR_POI, MISSION_OK, key))
+                self.poisVigilar.remove(key)
+                timer2 = threading.Timer(TIME_BETWEEN_POI_PING, self.checkMissionStatus, (convertStringToTuple(key),))
+                timer2.start()
+            else:
+                self.nextState = ASIGNAR_POI
+                result.append(convertStringToTuple(key))
+        minPoi = getClosestPOI(self.bebop.current_position, result)
+        if minPoi is None:
+            return None
+        return {"poi": minPoi, "type": POI_CRITICO}
 
     def handleMessage(self, message):
         self.messages.append(message)

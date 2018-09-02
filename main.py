@@ -1,12 +1,12 @@
-from flightplans import drone, droneTest
+from flightplans import drone
 import threading
 from connections.server import server
-from properties import HOME, INIT_POI_POSITION, POI_POSITIONS, FOREVER_ALONE
+from properties import HOME, INIT_POI_POSITION, FOREVER_ALONE
 from stateMachine.stateMachine import stateMachine
 
 
 def main(drone1):
-    stateMachine1 = stateMachine(HOME, INIT_POI_POSITION, POI_POSITIONS, FOREVER_ALONE, drone1)
+    stateMachine1 = stateMachine(HOME, INIT_POI_POSITION, FOREVER_ALONE, drone1)
     stateMachine1.execute()
     server1 = server(drone1, stateMachine1)
     my_ip = server1.ip

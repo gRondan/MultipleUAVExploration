@@ -1,20 +1,19 @@
 from stateMachine.statesEnum import CHEQUEAR_STATUS_MISION, DESPLAZARSE_SIN_CONEXION, MISION_FINALIZADA, GENERAL, BATERIA_BAJA, BATERIA_CRITICA, POI_CRITICO, POI_VIGILAR
-from batteryEnum import CRITICAL, LOW, NORMAL
-from utils import createMessage
+from batteryEnum import LOW, NORMAL
+from utils import createMessage, getClosestPOI
 from connections.message_type import UPDATE_MAP
-from properties import TIME_BETWEEN_POI_PING, POI_EPSILON
-import time
 import utils
+from properties import POI_POSITIONS
 
 
 class enviarMensajes():
-    def __init__(self, bebop, dataBuffer, client, timerChequearStatus, timeout, POIPositions, isAlone, poisVigilar, poisCritico, messages):
+    def __init__(self, bebop, dataBuffer, client, timerChequearStatus, timeout, isAlone, poisVigilar, poisCritico, messages):
         self.bebop = bebop
         self.nextState = dataBuffer
         self.client = client
         self.timerChequearStatus = timerChequearStatus
         self.timeout = timeout
-        self.POIPositions = POIPositions
+        self.POIPositions = POI_POSITIONS
         self.isAlone = isAlone
         self.poisVigilar = poisVigilar
         self.poisCritico = poisCritico
@@ -36,26 +35,34 @@ class enviarMensajes():
                 return self.client
             poi = self.isAsignarPOI()
             if poi is not None:
+                return poi
+            else:
                 return self.isChequearMision()
-            return poi
         return None
 
     def isChequearMision(self):
         if not self.isAlone:
-            for key, value in self.timerChequearStatus.items():
-                if ((time.time() - value) > TIME_BETWEEN_POI_PING):
-                    self.nextState = CHEQUEAR_STATUS_MISION
-                    return dict({"ip": key, "state": self.nextState})
+            if (len(self.poisToCheck) > 0):
+                self.nextState = CHEQUEAR_STATUS_MISION
+                return self.nextState
         return None
 
     def isAsignarPOI(self):
         result = None
         if len(self.poisCritico) > 0:
-            result = dict({"poi": self.poisCritico[0], "type": POI_CRITICO})
-            self.poisCritico.remove(result)
+            minPoi = getClosestPOI(self.bebop.current_position, self.poisCritico)
+            if minPoi is None:
+                return None
+            self.nextState = POI_CRITICO
+            self.poisCritico.remove(minPoi)
+            return {"poi": minPoi, "type": POI_CRITICO}
         elif len(self.poisVigilar) > 0:
-            result = dict({"poi": self.poisVigilar[0], "type": POI_VIGILAR})
-            self.poisVigilar.remove(result)
+            minPoi = getClosestPOI(self.bebop.current_position, self.poisVigilar)
+            if minPoi is None:
+                return None
+            self.nextState = POI_VIGILAR
+            self.poisVigilar.remove(minPoi)
+            return {"poi": minPoi, "type": POI_VIGILAR}
         return result
 
     def handleMessage(self, message):
