@@ -18,10 +18,29 @@ def main(drone1):
     client_handler.start()
 
 
+def interface(drone1):
+    command = input("prompt")
+    print(command)
+    while command != "q" or command == "Q":
+        if command == "h" or command == "H":
+            drone1.goHome()
+        elif command == "l" or command == "L":
+            drone1.land()
+        command = input("prompt")
+        print(command)
+    drone1.land()
+    drone1.bebop.disconnect()
+
+
 drone1 = drone.drone(HOME)
 drone1.bebop.connect(10)
 connection = threading.Thread(
     target=main,
     args=(drone1,)
 )
+connection2 = threading.Thread(
+    target=interface,
+    args=(drone1,)
+)
 connection.start()
+connection2.start()
