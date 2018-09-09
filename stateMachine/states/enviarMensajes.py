@@ -7,11 +7,11 @@ from properties import POI_POSITIONS
 
 
 class enviarMensajes():
-    def __init__(self, bebop, dataBuffer, client, timerChequearStatus, timeout, isAlone, poisVigilar, poisCritico, messages):
+    def __init__(self, bebop, dataBuffer, client, assignedPOIs, timeout, isAlone, poisVigilar, poisCritico, messages):
         self.bebop = bebop
         self.nextState = dataBuffer
         self.client = client
-        self.timerChequearStatus = timerChequearStatus
+        self.assignedPOIs = assignedPOIs
         self.timeout = timeout
         self.POIPositions = POI_POSITIONS
         self.isAlone = isAlone
@@ -40,11 +40,14 @@ class enviarMensajes():
                 return self.isChequearMision()
         return None
 
+#       si para algun POI ya asignado se cumple que salto su timer de chequee voy al estado chequearStatusMision
     def isChequearMision(self):
         if not self.isAlone:
-            if (len(self.poisToCheck) > 0):
-                self.nextState = CHEQUEAR_STATUS_MISION
-                return self.nextState
+            for key in self.assignedPOIs:
+                if (key in self.poisVigilar or key in self.poisCritico):
+                    checkStatusNextState = self.nextState
+                    self.nextState = CHEQUEAR_STATUS_MISION
+                    return checkStatusNextState
         return None
 
     def isAsignarPOI(self):

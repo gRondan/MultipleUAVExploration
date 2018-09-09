@@ -1,5 +1,6 @@
 import socket
-from properties import PORT, INTERFACE, IP_BASE, NETMASK, PING_TIMEOUT, SPHINX_FRIENDS, SPHINX_SIMULATION, SPHINX_PORT
+from properties import PORT, INTERFACE, IP_BASE, NETMASK, PING_TIMEOUT, SPHINX_SIMULATION
+from pyparrot.networking.connectionProperties import SPHINX_FRIENDS, SPHINX_PORT
 import ipaddress
 import threading
 from subprocess import Popen, PIPE
@@ -8,7 +9,7 @@ import json
 
 # CONSTANTS
 port = SPHINX_PORT
-net_ip = '127.0.0.0'
+net_ip = '127.0.0.1'
 if not SPHINX_SIMULATION:
     port = PORT
     net_ip = IP_BASE
@@ -21,7 +22,8 @@ ping_timeout = PING_TIMEOUT
 class client:
 
     def __init__(self):
-        self.network = ipaddress.ip_network(ip_address)
+        if SPHINX_SIMULATION is not True:
+            self.network = ipaddress.ip_network(ip_address)
         self.friends = []
 
     def check_connection(self, ip):
@@ -34,7 +36,9 @@ class client:
 
     def check_friends(self):
         cont = []
+        print("check_friends")
         for ip in self.friends:
+            print("ip: ", ip)
             status = self.check_connection(ip)
             if status == 0:
                 cont.append(ip)
@@ -67,7 +71,7 @@ class client:
                 client.connect((ip_address, port))
             client.send(str.encode(msj))
             response = client.recv(4096)
-            print (response)
+            print(response)
         except:
             pass
 

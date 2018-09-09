@@ -1,21 +1,22 @@
 from flightplans import drone
 import threading
 from connections.server import server
-from properties import HOME, INIT_POI_POSITION, POI_POSITIONS, FOREVER_ALONE, OBSTACLES
+from properties import HOME, INIT_POI_POSITION, FOREVER_ALONE, OBSTACLES
 from stateMachine.stateMachine import stateMachine
 
 
 def main(drone1):
-    stateMachine1 = stateMachine(HOME, INIT_POI_POSITION, FOREVER_ALONE, drone1, OBSTACLES)
-    stateMachine1.execute()
+    # stateMachine1 = stateMachine(HOME, INIT_POI_POSITION, FOREVER_ALONE, drone1, OBSTACLES)
+    stateMachine1 = stateMachine(HOME, INIT_POI_POSITION, FOREVER_ALONE, drone1)
     server1 = server(drone1, stateMachine1)
-    my_ip = server1.ip
+    my_ip = server1.get_server_ip()
     drone1.initialize(my_ip)
     client_handler = threading.Thread(
-        target=server.run_server,
-        args=(my_ip, drone1,)
+        target=server1.run_server,
+        args=()
     )
     client_handler.start()
+    stateMachine1.execute()
 
 
 def interface(drone1):

@@ -26,8 +26,8 @@ class drone:
     def initialize(self, ip):
         self.search_map[self.home[0]][self.home[1]] = 1
         self.ip = ip
-        success = self.bebop.connect(10)
-        print(success)
+        # success = self.bebop.connect(10)
+        # print(success)
         self.bebop.ask_for_state_update()
 
     def take_off(self):
@@ -106,10 +106,11 @@ class drone:
         # print("distance1: " + str(distance1) + " distance2: " + str(distance2))
         return (distance1 <= distance2)
 
+#       aparentemente no se usa
     def pointIsObstacule(x1, x2):
         isObstacule = False
         for obs in self.obstaculos:
-            if obs[0] == x1 and obs[1] == x2 :
+            if obs[0] == x1 and obs[1] == x2:
                 isObstacule = True
         return isObstacule
 
@@ -150,12 +151,10 @@ class drone:
         position = (x1, x2)
         return position
 
-
     def moveToPoiCritico(self, path):
         for i in range(len(path)):
             nextPosition = path[i]
             self.moveNextPositionPOICritico(nextPosition)
-
 
     def moveNextPositionPOICritico(self, new_position):
         dx, dy = new_position[0] - self.current_position[0], new_position[1] - self.current_position[1]
