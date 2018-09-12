@@ -163,12 +163,14 @@ class stateMachine():
         poiCriticoTimer.start()
 
     def poiCriticoTimeout(self, poi):
-        print("poiCriticoTimeout: ", poi)
+        print("poiCriticoTimeout: ", poi, "self.poisVigilar", self.poisVigilar, "self.poisCritico", self.poisCritico, "self.assignedPOIs", self.assignedPOIs)
         encontre = False
         if poi in self.poisVigilar:
             encontre = True
             self.poisVigilar.remove(poi)
         if poi in self.assignedPOIs:
             encontre = True
+
         if encontre:
+            "agrega poi"
             self.poisCritico.append(poi)

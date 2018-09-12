@@ -35,7 +35,7 @@ class asignarPOI():
         if self.isAlone:
             self.result = self.poiType
             self.bebop.poi_position = self.poi
-            print("drone ASignado: YOOOOOO")
+            self.assignedPOIs[self.poi] = self.bebop.ip
         else:
             if len(self.poiAlreadyAssigned) > 0 and self.previousState == CANCELAR_MISION:
                 return None
@@ -59,13 +59,14 @@ class asignarPOI():
                     self.client.send_message(message)
                 return None
 
-            timer1 = threading.Timer(WAIT_TIME, self.timeout)
+            timer1 = threading.Timer(WAIT_TIME, self.messageWaitTimeout)
             timer1.start()
 
             conditionMet = False
             while not conditionMet and not self.timeout:
-                self.waitMessage.acquire()
-                self.blockHandleMessage.release()
+                self.messageWait.acquire()\
+                if self.blockHandleMessage.locked():
+                    self.blockHandleMessage.release()
                 self.messageMutex.acquire()
                 conditionMet = len(self.availableDrones) + len(self.unavailableDrones) - 1 >= len(connected_drones)
                 self.messageMutex.release()
@@ -80,20 +81,19 @@ class asignarPOI():
                 if ip != self.bebop.ip:
                     self.client.send_direct_message(message2, ip)
             self.messageMutex.release()
-
-            timer2 = threading.Timer(WAIT_TIME, self.timeout)
+            timer2 = threading.Timer(WAIT_TIME, self.messageWaitTimeout)
             timer2.start()
             conditionMet = False
             self.availableDistances.append({"distance": distance, "ip": self.bebop.ip})
             while not conditionMet and not self.timeout:
-                self.waitMessage.acquire()
-                self.blockHandleMessage.release()
+                self.messageWait.acquire()
+                if self.blockHandleMessage.locked():
+                    self.blockHandleMessage.release()
                 self.messageMutex.acquire()
                 conditionMet = len(self.availableDistances) >= availableDronesNumber
                 self.messageMutex.release()
             self.timeout = False
             timer2.cancel()
-
             minDistance = distance
             minIp = self.bebop.ip
 
@@ -102,23 +102,21 @@ class asignarPOI():
                 if elem["distance"] < minDistance:
                     minDistance = elem["distance"]
                     minIp = elem["ip"]
-
             message3 = createMessage(asignarPOI, RESULT, minIp)
             for ip in self.availableDrones:
                 self.client.send_direct_message(message3, ip)
             self.messageMutex.release()
-
-            timer3 = threading.Timer(WAIT_TIME, self.timeout)
+            timer3 = threading.Timer(WAIT_TIME, self.messageWaitTimeout)
             timer3.start()
             conditionMet = False
             self.availableResults.append(self.bebop.ip)
             while not conditionMet and not self.timeout:
-                self.waitMessage.acquire()
-                self.blockHandleMessage.release()
+                self.messageWait.acquire()
+                if self.blockHandleMessage.locked():
+                    self.blockHandleMessage.release()
                 self.messageMutex.acquire()
                 conditionMet = len(self.availableResults) >= len(self.availableDrones)
                 self.messageMutex.release()
-
             self.timeout = False
             timer3.cancel()
 
@@ -134,19 +132,20 @@ class asignarPOI():
                     concensusValue = count
                     concensus = ip
             self.messageMutex.release()
-
             if concensus == self.bebop.ip:
                 self.result = self.poiType
                 self.bebop.poi_position = self.poi
-            self.assignedPOIs[convertTupleToString(self.poi)] = self.bebop.ip
+            self.assignedPOIs[convertTupleToString(self.poi)] = concensus
             timer2 = threading.Timer(TIME_BETWEEN_POI_PING, self.checkMissionStatus, (self.poi,))
             timer2.start()
             print("drone ASignado: ", concensus)
         print("POI ASignado: ", self.poi)
         return self.poi
 
-    def timeout(self):
+    def messageWaitTimeout(self):
         self.timeout = True
+        if self.messageWait.locked():
+            self.messageWait.release()
 
     def handleMessage(self, message):
         self.blockHandleMessage.acquire()
@@ -161,5 +160,6 @@ class asignarPOI():
             self.availableResults.append(message["content"])
         elif message["message_type"] == POI_ALREADY_ASSIGNED and message['message_id'] == self.idMessage:
             self.poiAlreadyAssigned.append(message["content"])
+        if self.messageWait.locked():
+            self.messageWait.release()
         self.messageMutex.release()
-        self.messageWait.release()

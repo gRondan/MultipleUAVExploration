@@ -26,7 +26,7 @@ class inicio():
         timer = Timer(SYNC_WAIT, self.wakeUp)
         timer.start()
         self.syncLock.acquire()
-        # client1.search_friends(self.bebop.ip)
+        client1.search_friends(self.bebop.ip)
         print("execute de inicio")
         if not self.awoken:
             message = createMessage(INICIO, SYNC, 'wake up!')
