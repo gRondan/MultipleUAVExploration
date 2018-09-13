@@ -18,7 +18,7 @@ def measure(lat1, lon1, lat2, lon2):  # generally used geo measurement function
     return d * 1000 # meters
 
 def main(bebop):	
-	print("RUTA 1 STARTING")
+	print("RUTA 2 STARTING")
 	bebop.smart_sleep(1)
 
 	bebop.ask_for_state_update()
@@ -29,31 +29,31 @@ def main(bebop):
 	bebop.move_relative(5, 0, 0, 0)
 
 	bebop.smart_sleep(1)
-	bebop.move_relative(0, 5, 0, 0)
-
-	bebop.smart_sleep(1)
-	bebop.move_relative(2, 0, 0, 0)
-
-	bebop.smart_sleep(1)
-	bebop.move_relative(0, 0, 0, math.pi / 2)
-
-	bebop.smart_sleep(1)
-	bebop.move_relative(2, 0, 0, 0)
-
-	bebop.smart_sleep(1)
-	bebop.move_relative(0, 0, 0, math.pi / 2)
-
-	bebop.smart_sleep(1)
-	bebop.move_relative(2, 0, 0, 0)
-
-	bebop.smart_sleep(1)
-	bebop.move_relative(0, 0, 0, math.pi / 2)
+	bebop.move_relative(0, -5, 0, 0)
 
 	bebop.smart_sleep(1)
 	bebop.move_relative(2, 0, 0, 0)
 
 	bebop.smart_sleep(1)
 	bebop.move_relative(0, 0, 0, -math.pi / 2)
+
+	bebop.smart_sleep(1)
+	bebop.move_relative(2, 0, 0, 0)
+
+	bebop.smart_sleep(1)
+	bebop.move_relative(0, 0, 0, -math.pi / 2)
+
+	bebop.smart_sleep(1)
+	bebop.move_relative(2, 0, 0, 0)
+
+	bebop.smart_sleep(1)
+	bebop.move_relative(0, 0, 0, -math.pi / 2)
+
+	bebop.smart_sleep(1)
+	bebop.move_relative(2, 0, 0, 0)
+
+	bebop.smart_sleep(1)
+	bebop.move_relative(0, 0, 0, math.pi / 2)
 
 	bebop.smart_sleep(1)
 	bebop.move_relative(5, 0, 0, 0)
