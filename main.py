@@ -1,8 +1,9 @@
 from flightplans import drone
 import threading
 from connections.server import server
-from properties import HOME, INIT_POI_POSITION, FOREVER_ALONE, OBSTACLES, SPHINX_SIMULATION
+from properties import HOME, INIT_POI_POSITION, FOREVER_ALONE, OBSTACLES, SPHINX_SIMULATION, ALGORITHM
 from stateMachine.stateMachine import stateMachine
+from enums import RANDOM, SH_ORIGINAL, SH_TIMESTAMP
 
 if SPHINX_SIMULATION:
     import matplotlib
@@ -45,7 +46,14 @@ def plotMatrix(drone1):
     plt.show()
     plt.suptitle("Cubrimiento del mapa para el dron " + str(drone1.ip))
     while True:
-        plt.imshow(drone1.search_map, norm=Normalize(vmin=0, vmax=10, clip=True), cmap=plt.cm.RdYlGn)
+        display_matrix = drone1.search_map
+        vmin = 0
+        vmax = 10
+        if ALGORITHM == SH_TIMESTAMP:
+            vmin = -256
+            vmax = 0
+            display_matrix = [[-(time.time() - drone1.search_map[i][j]) for j in range(int(drone1.mapa_largo))]for i in range(int(drone1.mapa_ancho))]
+        plt.imshow(display_matrix, norm=Normalize(vmin=vmin, vmax=vmax, clip=True), cmap=plt.cm.RdYlGn)
         plt.draw()
         plt.pause(0.001)
         time.sleep(2)
