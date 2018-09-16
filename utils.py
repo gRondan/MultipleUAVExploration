@@ -39,7 +39,7 @@ def getClosestPOI(current_position, pois):
     for poi in pois:
         distance = cartesianDistance(poi, current_position)
         if distance < minDistance:
-            minPOI = convertStringToTuple(poi)
+            minPOI = poi
             minDistance = distance
     return minPOI
 

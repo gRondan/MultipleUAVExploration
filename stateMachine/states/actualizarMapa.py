@@ -5,7 +5,7 @@ from properties import POI_POSITIONS, POI_TIMERS
 
 
 class actualizarMapa():
-    def __init__(self, bebop, dataBuffer, previousState, poisVigilar, poiVigilarTimeout, poiVigilarTimeoutDict, messages):
+    def __init__(self, bebop, dataBuffer, previousState, poisVigilar, poiVigilarTimeout, poiVigilarTimeoutDict, poisCriticos, messages):
         self.nextState = ENVIAR_MENSAJES
         self.bebop = bebop
         self.previousState = previousState
@@ -14,6 +14,7 @@ class actualizarMapa():
         self.poisVigilar = poisVigilar
         self.poiVigilarTimeout = poiVigilarTimeout
         self.poiVigilarTimeoutDict = poiVigilarTimeoutDict
+        self.poisCriticos = poisCriticos
 
     def getNextState(self):
         return self.nextState
@@ -34,6 +35,8 @@ class actualizarMapa():
                 self.poiVigilarTimeoutDict[poiKey] = executionTimerNew
             if current_position in self.poisVigilar:
                 self.poisVigilar.remove(current_position)
+            if current_position in self.poisCriticos:
+                self.poisCriticos.remove(current_position)
             nextState = EXPLORAR
         self.bebop.updateSearchMap(self.bebop.current_position)
         return nextState

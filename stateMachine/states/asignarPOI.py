@@ -1,8 +1,8 @@
-from stateMachine.statesEnum import EXPLORAR, ASIGNAR_POI, CANCELAR_MISION
+from stateMachine.statesEnum import EXPLORAR, ASIGNAR_POI, CANCELAR_MISION, GENERAL
 from utils import cartesianDistance, createMessage, convertTupleToString
-from properties import DISTANCE_ENERGY_RATIO, LOW_BATTERY, WAIT_TIME, TIME_BETWEEN_POI_PING, SPHINX_SIMULATION
+from properties import DISTANCE_ENERGY_RATIO, LOW_BATTERY, WAIT_TIME, TIME_BETWEEN_POI_PING, SPHINX_SIMULATION, SYNC_ASIGNARPOI_MSG
 import threading
-from connections.message_type import AVAILABLE, UNAVAILABLE, DISTANCE, RESULT, POI_ALREADY_ASSIGNED
+from connections.message_type import AVAILABLE, UNAVAILABLE, DISTANCE, RESULT, POI_ALREADY_ASSIGNED, POI_ASSIGNED
 
 
 class asignarPOI():
@@ -38,10 +38,12 @@ class asignarPOI():
             self.assignedPOIs[self.poi] = self.bebop.ip
         else:
             if len(self.poiAlreadyAssigned) > 0 and self.previousState == CANCELAR_MISION:
+                print("self.poiAlreadyAssigned",self.poiAlreadyAssigned," self.previousState:", self.previousState)
                 return None
 
             if len(self.availableDistances) > 0 or len(self.availableResults) > 0:
                 # im late to the party
+                print("self.availableDistances", self.availableDistances, "self.availableResults ",self.availableResults)
                 return None
 
             connected_drones = self.client.check_friends()
@@ -77,11 +79,11 @@ class asignarPOI():
 
             message2 = createMessage(ASIGNAR_POI, DISTANCE, dict({'ip': self.bebop.ip, 'distance': distance}))
             self.messageMutex.acquire()
-            for ip in self.availableDrones:
-                if ip != self.bebop.ip:
-                    self.client.send_direct_message(message2, ip)
+            # for ip in self.availableDrones:
+            #     if ip != self.bebop.ip:
+            self.client.send_message(message2)
             self.messageMutex.release()
-            timer2 = threading.Timer(WAIT_TIME, self.messageWaitTimeout)
+            timer2 = threading.Timer(SYNC_ASIGNARPOI_MSG, self.messageWaitTimeout)
             timer2.start()
             conditionMet = False
             self.availableDistances.append({"distance": distance, "ip": self.bebop.ip})
@@ -109,9 +111,10 @@ class asignarPOI():
                         minIp = elem["ip"]
             message3 = createMessage(ASIGNAR_POI, RESULT, minIp)
             for ip in self.availableDrones:
-                self.client.send_direct_message(message3, ip)
+                if ip != self.bebop.ip:
+                    self.client.send_direct_message(message3, ip)
             self.messageMutex.release()
-            timer3 = threading.Timer(WAIT_TIME, self.messageWaitTimeout)
+            timer3 = threading.Timer(SYNC_ASIGNARPOI_MSG, self.messageWaitTimeout)
             timer3.start()
             conditionMet = False
             self.availableResults.append(minIp)
@@ -145,6 +148,8 @@ class asignarPOI():
             if concensus == self.bebop.ip:
                 self.result = self.poiType
                 self.bebop.poi_position = self.poi
+                message4 = createMessage(GENERAL, POI_ASSIGNED, convertTupleToString(self.poi))
+                self.client.send_message(message4)
             self.assignedPOIs[convertTupleToString(self.poi)] = concensus
             timer2 = threading.Timer(TIME_BETWEEN_POI_PING, self.checkMissionStatus, (self.poi,))
             timer2.start()

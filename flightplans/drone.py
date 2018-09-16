@@ -2,6 +2,7 @@ import properties
 import utils
 import math
 from batteryEnum import LOW, CRITICAL, NORMAL
+from altitudeEnum import TOO_LOW, TOO_HIGH, ALTITUDE_OK
 import threading
 from pyparrot.Bebop import Bebop
 import random
@@ -132,9 +133,9 @@ class drone:
         altitude = self.getDroneAltitude()
         if (altitude < properties.MIN_ALTITUDE):
             return TOO_LOW
-        else if (altitude > properties.MAX_ALTITUDE):
+        elif (altitude > properties.MAX_ALTITUDE):
             return TOO_HIGH
-        else: 
+        else:
             return ALTITUDE_OK
 
     def getDronVerticalAlignment(self):
