@@ -140,7 +140,7 @@ class drone:
     def getDronVerticalAlignment(self):
         droneAltitudeStatus = self.checkDroneAltitudeStatus()
         verticalAlignment = 0
-        if (droneAltitudeStatus == TOO_LOW || droneAltitudeStatus == TOO_HIGH):
+        if (droneAltitudeStatus == TOO_LOW or droneAltitudeStatus == TOO_HIGH):
             #negative goes up, positive goes down
             verticalAlignment = self.getDroneAltitude() - properties.OPTIMAL_ALTITUDE
         else:
