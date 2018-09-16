@@ -1,8 +1,15 @@
 from flightplans import drone
 import threading
 from connections.server import server
-from properties import HOME, INIT_POI_POSITION, FOREVER_ALONE, OBSTACLES
+from properties import HOME, INIT_POI_POSITION, FOREVER_ALONE, OBSTACLES, SPHINX_SIMULATION, ALGORITHM
 from stateMachine.stateMachine import stateMachine
+from enums import RANDOM, SH_ORIGINAL, SH_TIMESTAMP
+
+if SPHINX_SIMULATION:
+    import matplotlib
+    import matplotlib.pyplot as plt
+    import time
+    from matplotlib.colors import Normalize
 
 
 def main(drone1):
@@ -33,6 +40,25 @@ def interface(drone1):
     drone1.bebop.disconnect()
 
 
+def plotMatrix(drone1):
+    matplotlib.use('TkAgg')
+    plt.ion()
+    plt.show()
+    plt.suptitle("Cubrimiento del mapa para el dron " + str(drone1.ip))
+    while True:
+        display_matrix = drone1.search_map
+        vmin = 0
+        vmax = 10
+        if ALGORITHM == SH_TIMESTAMP:
+            vmin = -256
+            vmax = 0
+            display_matrix = [[-(time.time() - drone1.search_map[i][j]) for j in range(int(drone1.mapa_largo))]for i in range(int(drone1.mapa_ancho))]
+        plt.imshow(display_matrix, norm=Normalize(vmin=vmin, vmax=vmax, clip=True), cmap=plt.cm.RdYlGn)
+        plt.draw()
+        plt.pause(0.001)
+        time.sleep(2)
+
+
 drone1 = drone.drone(HOME)
 drone1.bebop.connect(10)
 connection = threading.Thread(
@@ -43,5 +69,13 @@ connection2 = threading.Thread(
     target=interface,
     args=(drone1,)
 )
+
 connection.start()
 connection2.start()
+
+if SPHINX_SIMULATION:
+    connection3 = threading.Thread(
+        target=plotMatrix,
+        args=(drone1,)
+    )
+    connection3.start()

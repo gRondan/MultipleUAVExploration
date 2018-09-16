@@ -6,6 +6,7 @@ import threading
 from pyparrot.Bebop import Bebop
 import random
 import time
+from enums import SH_ORIGINAL, SH_TIMESTAMP, RANDOM
 
 
 class drone:
@@ -25,7 +26,13 @@ class drone:
         self.max_altitude = properties.MAX_ALTITUDE
 
     def initialize(self, ip):
-        self.search_map[self.home[0]][self.home[1]] = 1
+        if properties.ALGORITHM == SH_ORIGINAL:
+            self.search_map[self.home[0]][self.home[1]] = 1
+        elif properties.ALGORITHM == SH_TIMESTAMP:
+            init_time = time.time()
+            self.search_map = [[init_time for j in range(int(self.mapa_largo))]for i in range(int(self.mapa_ancho))]
+        elif properties.ALGORITHM == RANDOM:
+            self.search_map[self.home[0]][self.home[1]] = 1
         self.ip = ip
         # success = self.bebop.connect(10)
         # print(success)
@@ -39,6 +46,8 @@ class drone:
         self.bebop.safe_land(10)
 
     def move(self, new_position):
+        print("new position: ", new_position)
+        print("current_position: ", self.current_position)
         dx, dy = new_position[0] - self.current_position[0], new_position[1] - self.current_position[1]
         real_dx, real_dy = dx * self.rango_ancho, dy * self.rango_largo
         verticalMove = self.getDronVerticalAlignment()
@@ -53,6 +62,14 @@ class drone:
         self.poi_position = poiPosition
 
     def explore(self, forcePosition):
+        if properties.ALGORITHM == SH_ORIGINAL:
+            return self.explore_sh_original(forcePosition)
+        elif properties.ALGORITHM == SH_TIMESTAMP:
+            return self.explore_sh_timestamp(forcePosition)
+        elif properties.ALGORITHM == RANDOM:
+            return self.explore_random(forcePosition)
+
+    def explore_sh_original(self, forcePosition):
         firstTime = True
         x = self.current_position[0]
         y = self.current_position[1]
@@ -73,10 +90,51 @@ class drone:
                         best_values.append((x3, y3))
                         val = self.search_map[x3][y3]
                     elif self.search_map[x3][y3] < val:
-                        best_values = []
-                        best_values.append((x3, y3))
+                        best_values = [(x3, y3)]
                         val = self.search_map[x3][y3]
                     self.mutex_search_map.release()
+        selected = self.selectBestValue(best_values)
+        print("x: " + str(selected[0]) + " y: " + str(selected[1]))
+        return selected
+
+    def explore_sh_timestamp(self, forcePosition):
+        firstTime = True
+        x = self.current_position[0]
+        y = self.current_position[1]
+        best_values = []
+        for y2 in range(-1, 2):
+            for x2 in range(-1, 2):
+                x3 = x + x2
+                y3 = y + y2
+                if self.validatePosition(x3, y3, forcePosition):
+                    if firstTime:
+                        self.mutex_search_map.acquire()
+                        val = self.search_map[x3][y3]
+                        self.mutex_search_map.release()
+                        firstTime = False
+                    self.mutex_search_map.acquire()
+                    if (self.search_map[x3][y3] == val):
+                        best_values.append((x3, y3))
+                        val = self.search_map[x3][y3]
+                    elif self.search_map[x3][y3] < val:
+                        best_values = [(x3, y3)]
+                        val = self.search_map[x3][y3]
+                    self.mutex_search_map.release()
+        print("BEST VALUES: ", best_values)
+        selected = self.selectBestValue(best_values)
+        print("x: " + str(selected[0]) + " y: " + str(selected[1]))
+        return selected
+
+    def explore_random(self, forcePosition):
+        x = self.current_position[0]
+        y = self.current_position[1]
+        best_values = []
+        for y2 in range(-1, 2):
+            for x2 in range(-1, 2):
+                x3 = x + x2
+                y3 = y + y2
+                if self.validatePosition(x3, y3, forcePosition):
+                    best_values.append((x3, y3))
         selected = self.selectBestValue(best_values)
         print("x: " + str(selected[0]) + " y: " + str(selected[1]))
         return selected
@@ -110,7 +168,7 @@ class drone:
         return (distance1 <= distance2)
 
 #       aparentemente no se usa
-    def pointIsObstacule(x1, x2):
+    def pointIsObstacule(self, x1, x2):
         isObstacule = False
         for obs in self.obstaculos:
             if obs[0] == x1 and obs[1] == x2:
@@ -122,7 +180,12 @@ class drone:
 
     def updateSearchMap(self, tupla):
         self.mutex_search_map.acquire()
-        self.search_map[tupla[0]][tupla[1]] += 1
+        if properties.ALGORITHM == SH_ORIGINAL:
+            self.search_map[tupla[0]][tupla[1]] += 1
+        elif properties.ALGORITHM == SH_TIMESTAMP:
+            self.search_map[tupla[0]][tupla[1]] = time.time()
+        elif properties.ALGORITHM == RANDOM:
+            self.search_map[tupla[0]][tupla[1]] += 1
         self.mutex_search_map.release()
 
     def getDroneAltitude(self):
@@ -169,12 +232,6 @@ class drone:
         elif res > target[pos]:
             res = res - 1
         return res
-
-    def getClosestPositionToTarget(self, target):
-        x1 = getClosestCoordinateToTarget(target, 0)
-        x2 = getClosestCoordinateToTarget(target, 1)
-        position = (x1, x2)
-        return position
 
     def moveToPoiCritico(self, path):
         for i in range(len(path)):
