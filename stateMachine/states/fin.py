@@ -10,7 +10,7 @@ class fin():
 
     def execute(self):
         self.bebop.disconnect()
-        self.client.send_direct_message(self.bebop.ip, createMessage(FIN, END_MISSION, "end"))
+        self.client.send_direct_message(createMessage(FIN, END_MISSION, "end"), self.bebop.ip)
         return None
 
     def getNextState(self):

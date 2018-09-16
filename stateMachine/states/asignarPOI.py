@@ -137,6 +137,10 @@ class asignarPOI():
                 if count > concensusValue:
                     concensusValue = count
                     concensus = ip
+                elif count == concensusValue:
+                    if self.isLower(ip, concensus):
+                        concensusValue = count
+                        concensus = ip
             self.messageMutex.release()
             if concensus == self.bebop.ip:
                 self.result = self.poiType
@@ -154,6 +158,8 @@ class asignarPOI():
             self.messageWait.release()
 
     def isLower(self, ip1, ip2):
+        if ip2 == "":
+            return True
         if SPHINX_SIMULATION:
             print("isLower: ip1 ",ip1, " ip2 ", ip2)
             return int(ip1) < int(ip2)
