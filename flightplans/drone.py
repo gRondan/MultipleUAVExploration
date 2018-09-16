@@ -22,12 +22,14 @@ class drone:
         self.home = home
         self.bebop = Bebop()
         self.obstaculos = properties.OBSTACLES
+        self.max_altitude = properties.MAX_ALTITUDE
 
     def initialize(self, ip):
         self.search_map[self.home[0]][self.home[1]] = 1
         self.ip = ip
         # success = self.bebop.connect(10)
         # print(success)
+        self.bebop.set_max_altitude(self.max_altitude)
         self.bebop.ask_for_state_update()
 
     def take_off(self):
@@ -39,7 +41,8 @@ class drone:
     def move(self, new_position):
         dx, dy = new_position[0] - self.current_position[0], new_position[1] - self.current_position[1]
         real_dx, real_dy = dx * self.rango_ancho, dy * self.rango_largo
-        self.bebop.move_relative(real_dx, real_dy, 0, 0)
+        verticalMove = self.getDronVerticalAlignment()
+        self.bebop.move_relative(real_dx, real_dy, verticalMove, 0)
         time.sleep(2)
         self.current_position = new_position
         self.mutex_search_map.acquire()
@@ -122,6 +125,28 @@ class drone:
         self.search_map[tupla[0]][tupla[1]] += 1
         self.mutex_search_map.release()
 
+    def getDroneAltitude(self):
+        return self.bebop.sensors.sensors_dict["AltitudeChanged_altitude"]
+
+    def checkDroneAltitudeStatus(self):
+        altitude = self.getDroneAltitude()
+        if (altitude < properties.MIN_ALTITUDE):
+            return TOO_LOW
+        else if (altitude > properties.MAX_ALTITUDE):
+            return TOO_HIGH
+        else: 
+            return ALTITUDE_OK
+
+    def getDronVerticalAlignment(self):
+        droneAltitudeStatus = self.checkDroneAltitudeStatus()
+        verticalAlignment = 0
+        if (droneAltitudeStatus == TOO_LOW || droneAltitudeStatus == TOO_HIGH):
+            #negative goes up, positive goes down
+            verticalAlignment = self.getDroneAltitude() - properties.OPTIMAL_ALTITUDE
+        else:
+            verticalAlignment = 0
+        return verticalAlignment
+
     def getBatteryPercentage(self):
         return self.bebop.sensors.battery
 
@@ -159,7 +184,8 @@ class drone:
     def moveNextPositionPOICritico(self, new_position):
         dx, dy = new_position[0] - self.current_position[0], new_position[1] - self.current_position[1]
         real_dx, real_dy = dx * self.rango_ancho, dy * self.rango_largo
-        self.bebop.move_relative(real_dx, real_dy, 0, 0)
+        verticalMove = self.getDronVerticalAlignment()
+        self.bebop.move_relative(real_dx, real_dy, verticalMove, 0)
         time.sleep(2)
         self.current_position = new_position
 
