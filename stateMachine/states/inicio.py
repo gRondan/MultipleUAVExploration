@@ -1,7 +1,7 @@
 from stateMachine.statesEnum import DESPEGAR, INICIO
 from connections.client import client
 from threading import Timer, Lock
-from properties import SYNC_WAIT, POI_POSITIONS, POI_TIMERS
+from properties import SYNC_WAIT, POI_POSITIONS, POI_TIMERS, SPHINX_SIMULATION
 from utils import createMessage, convertTupleToString
 from connections.message_type import SYNC
 

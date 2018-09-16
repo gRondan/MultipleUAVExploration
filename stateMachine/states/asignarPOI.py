@@ -1,6 +1,6 @@
 from stateMachine.statesEnum import EXPLORAR, ASIGNAR_POI, CANCELAR_MISION
 from utils import cartesianDistance, createMessage, convertTupleToString
-from properties import DISTANCE_ENERGY_RATIO, LOW_BATTERY, WAIT_TIME, TIME_BETWEEN_POI_PING
+from properties import DISTANCE_ENERGY_RATIO, LOW_BATTERY, WAIT_TIME, TIME_BETWEEN_POI_PING, SPHINX_SIMULATION
 import threading
 from connections.message_type import AVAILABLE, UNAVAILABLE, DISTANCE, RESULT, POI_ALREADY_ASSIGNED
 
@@ -64,7 +64,7 @@ class asignarPOI():
 
             conditionMet = False
             while not conditionMet and not self.timeout:
-                self.messageWait.acquire()\
+                self.messageWait.acquire()
                 if self.blockHandleMessage.locked():
                     self.blockHandleMessage.release()
                 self.messageMutex.acquire()
@@ -75,7 +75,7 @@ class asignarPOI():
             timer1.cancel()
             availableDronesNumber = len(self.availableDrones)
 
-            message2 = createMessage(ASIGNAR_POI, DISTANCE, {'ip': self.bebop.ip, 'distance': distance})
+            message2 = createMessage(ASIGNAR_POI, DISTANCE, dict({'ip': self.bebop.ip, 'distance': distance}))
             self.messageMutex.acquire()
             for ip in self.availableDrones:
                 if ip != self.bebop.ip:
@@ -98,18 +98,23 @@ class asignarPOI():
             minIp = self.bebop.ip
 
             self.messageMutex.acquire()
+            print("self.availableDistances: ", self.availableDistances)
             for elem in self.availableDistances:
                 if elem["distance"] < minDistance:
                     minDistance = elem["distance"]
                     minIp = elem["ip"]
-            message3 = createMessage(asignarPOI, RESULT, minIp)
+                elif  elem["distance"] == minDistance:
+                    if self.isLower(elem["ip"], minIp):
+                        minDistance = elem["distance"]
+                        minIp = elem["ip"]
+            message3 = createMessage(ASIGNAR_POI, RESULT, minIp)
             for ip in self.availableDrones:
                 self.client.send_direct_message(message3, ip)
             self.messageMutex.release()
             timer3 = threading.Timer(WAIT_TIME, self.messageWaitTimeout)
             timer3.start()
             conditionMet = False
-            self.availableResults.append(self.bebop.ip)
+            self.availableResults.append(minIp)
             while not conditionMet and not self.timeout:
                 self.messageWait.acquire()
                 if self.blockHandleMessage.locked():
@@ -123,6 +128,7 @@ class asignarPOI():
             concensus = ''
             concensusValue = 0
             self.messageMutex.acquire()
+            print("self.availableResults: ",self.availableResults)
             for ip in self.availableDrones:
                 count = 0
                 for elem in self.availableResults:
@@ -138,7 +144,7 @@ class asignarPOI():
             self.assignedPOIs[convertTupleToString(self.poi)] = concensus
             timer2 = threading.Timer(TIME_BETWEEN_POI_PING, self.checkMissionStatus, (self.poi,))
             timer2.start()
-            print("drone ASignado: ", concensus)
+            print("drone Asignado: ", concensus)
         print("POI ASignado: ", self.poi)
         return self.poi
 
@@ -147,7 +153,18 @@ class asignarPOI():
         if self.messageWait.locked():
             self.messageWait.release()
 
+    def isLower(self, ip1, ip2):
+        if SPHINX_SIMULATION:
+            print("isLower: ip1 ",ip1, " ip2 ", ip2)
+            return int(ip1) < int(ip2)
+        else:
+            str1 = ip1.split(".")[3]
+            str2 = ip2.split(".")[3]
+            return int(str1) < int(str2)
+
+
     def handleMessage(self, message):
+        print("handleMessage: ", message)
         self.blockHandleMessage.acquire()
         self.messageMutex.acquire()
         if message["message_type"] == AVAILABLE:

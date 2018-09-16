@@ -63,22 +63,26 @@ class client:
                         print(i, 'is unreachable')
 
     def client_request(self, ip_address, msj):
-        try:
-            client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            if SPHINX_SIMULATION:
-                client.connect(('127.0.0.1', ip_address))
-            else:
-                client.connect((ip_address, port))
-            client.send(str.encode(msj))
-            response = client.recv(4096)
-            print(response)
-        except:
-            pass
+        # try:
+        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        if SPHINX_SIMULATION:
+            client.connect(('127.0.0.1', int(ip_address)))
+        else:
+            client.connect((ip_address, port))
+        client.send(str.encode(msj))
+        response = client.recv(4096)
+        print(response)
+        # except:
+        #     pass
 
     def send_message(self, msj):
+        print("client send_message:", msj)
+
         def send_message_thread(self, msj_dict):
             msj = json.dumps(msj_dict)
+            print("client send_message self.friends:", self.friends)
             for ip in self.friends:
+                print("client send_message ip:", ip)
                 ip = str(ip)
                 hostalive = self.check_connection(ip)
                 if hostalive == 0:
@@ -95,9 +99,10 @@ class client:
             target=send_message_thread,
             args=(self, msj,)
         )
-        handler.start
+        handler.start()
 
     def send_direct_message(self, msj, ip):
+        print("client send_direct_message:", msj, " ip: ",ip)
         def send_message_thread(self, msj_dict, ip):
             msj = json.dumps(msj_dict)
             ip = str(ip)
@@ -116,7 +121,7 @@ class client:
             target=send_message_thread,
             args=(self, msj, ip,)
         )
-        handler.start
+        handler.start()
 
     def reconect(self, msj, ip):
         found = False

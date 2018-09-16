@@ -9,7 +9,7 @@ asignarPOI, aterrizar, bateriaBaja, bateriaCritica, cancelarMision, chequearStat
 despegar, desplazarse, enviarMensajes, explorar, fin, inicio, misionFinalizada, POICritico,
 POIVigilar, pingSinConexion, cargarBateria, desplazarseSinConexion)
 from properties import TIMEOUT, POI_CRITICO_TIMERS, POI_POSITIONS
-from utils import createMessage
+from utils import createMessage, convertStringToTuple
 from connections.message_type import UPDATE_MAP, MISSION_ABORTED, POI_ALREADY_ASSIGNED
 import stateMachine.statesEnum as enum
 from threading import Timer, Lock
@@ -135,7 +135,7 @@ class stateMachine():
         print("handleMessage: ", message)
         if message["state"] == GENERAL:
             if message["message_type"] == UPDATE_MAP:
-                self.bebop.updateSearchMap(message["content"])
+                self.bebop.updateSearchMap(convertStringToTuple(message["content"]))
             elif message["message_type"] == MISSION_ABORTED:
                 self.checkPOIStatus(message["ip"], message["poi"])
         elif self.currentState == message["state"]:

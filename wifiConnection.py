@@ -53,10 +53,14 @@ class WifiConnection:
 
         self.drone_type = drone_type
         self.udp_send_port = 0 # defined during the handshake
-
         print('INTERNAL_UDP_PORT: ',INTERNAL_UDP_PORT)
         print('INTERNAL_TCP_IP: ',INTERNAL_TCP_IP)
-        self.udp_receive_port = INTERNAL_UDP_PORT
+        if(INTERNAL_UDP_PORT is not None):
+            self.udp_receive_port = INTERNAL_UDP_PORT
+        else:
+            self.udp_receive_port = 43261
+        if(INTERNAL_TCP_IP is not None):
+            self.connection_info.address = INTERNAL_TCP_IP
         self.is_listening = True  # for the UDP listener
 
         if (drone_type == "Bebop"):
@@ -293,7 +297,7 @@ class WifiConnection:
 
         # create the TCP socket for the handshake
         tcp_sock = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
-        self.connection_info.address = INTERNAL_TCP_IP
+
         #print (self.connection_info.address, self.connection_info.port)
         #print(ipaddress.IPv4Address(self.connection_info.address))
         self.drone_ip = ipaddress.IPv4Address(self.connection_info.address).exploded
