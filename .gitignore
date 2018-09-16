@@ -2,5 +2,7 @@ __pycache__/
 *.py[cod]
 venv/
 venv2/
+venv3/
+venv4/
 properties.py
 env-proyecto
