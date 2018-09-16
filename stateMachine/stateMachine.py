@@ -8,9 +8,9 @@ from stateMachine.states import (actualizarMapaSinConexion, actualizarMapa,
 asignarPOI, aterrizar, bateriaBaja, bateriaCritica, cancelarMision, chequearStatusMision,
 despegar, desplazarse, enviarMensajes, explorar, fin, inicio, misionFinalizada, POICritico,
 POIVigilar, pingSinConexion, cargarBateria, desplazarseSinConexion)
-from properties import TIMEOUT, POI_CRITICO_TIMERS, POI_POSITIONS
+from properties import TIMEOUT, POI_CRITICO_TIMERS, POI_POSITIONS, POI_TIMERS
 from utils import createMessage, convertStringToTuple
-from connections.message_type import UPDATE_MAP, MISSION_ABORTED, POI_ALREADY_ASSIGNED
+from connections.message_type import UPDATE_MAP, MISSION_ABORTED, POI_ALREADY_ASSIGNED, POI_ASSIGNED
 import stateMachine.statesEnum as enum
 from threading import Timer, Lock
 
@@ -71,7 +71,7 @@ class stateMachine():
                 # desplazarseState.execute()
                 # currentState = desplazarseState.getNextState()
             elif self.currentState == ACTUALIZAR_MAPA:
-                self.state = actualizarMapa.actualizarMapa(self.bebop, self.dataBuffer, self.previousState, self.poisVigilar, self.poiVigilarTimeout, self.poiVigilarTimeoutDict, self.messages[self.currentState])
+                self.state = actualizarMapa.actualizarMapa(self.bebop, self.dataBuffer, self.previousState, self.poisVigilar, self.poiVigilarTimeout, self.poiVigilarTimeoutDict, self.poisCritico, self.messages[self.currentState])
 
                 # currentState = actualizarMapaState.getNextState()
             elif self.currentState == ENVIAR_MENSAJES:
@@ -135,9 +135,22 @@ class stateMachine():
         print("handleMessage: ", message)
         if message["state"] == GENERAL:
             if message["message_type"] == UPDATE_MAP:
-                self.bebop.updateSearchMap(convertStringToTuple(message["content"]))
+                point = convertStringToTuple(message["content"])
+                self.bebop.updateSearchMap(point)
+                if point in self.poisCritico:
+                    self.poisCritico.remove(point)
+                if point in self.poisVigilar:
+                    self.poisVigilar.remove(point)
+                    timerPoi = Timer(POI_TIMERS[POI_POSITIONS.index(point)], self.poiVigilarTimeout, (point,))
+                    timerPoi.start()
             elif message["message_type"] == MISSION_ABORTED:
                 self.checkPOIStatus(message["ip"], message["poi"])
+            elif message["message_type"] == POI_ASSIGNED:
+                point = convertStringToTuple(message["content"])
+                if point in self.poisCritico:
+                    self.poisCritico.remove(point)
+                if point in self.poisVigilar:
+                    self.poisVigilar.remove(point)
         elif self.currentState == message["state"]:
             self.state.handleMessage(message)
         else:
@@ -168,9 +181,5 @@ class stateMachine():
         if poi in self.poisVigilar:
             encontre = True
             self.poisVigilar.remove(poi)
-        if poi in self.assignedPOIs:
-            encontre = True
-
-        if encontre:
-            "agrega poi"
+        if encontre or poi == self.bebop.poi_position:
             self.poisCritico.append(poi)

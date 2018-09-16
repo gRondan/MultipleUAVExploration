@@ -33,6 +33,13 @@ class enviarMensajes():
             elif not self.isAlone:
                 self.nextState = DESPLAZARSE_SIN_CONEXION
                 return self.client
+            if self.bebop.poi_position is not None:
+                print("self.bebop.poi_position", self.bebop.poi_position, " self.poisCritico ",self.poisCritico)
+                if self.bebop.poi_position in self.poisCritico:
+                    self.nextState = POI_CRITICO
+                else:
+                    self.nextState = POI_VIGILAR
+                return self.bebop.poi_position
             poi = self.isAsignarPOI()
             if poi is not None:
                 return poi
@@ -63,7 +70,7 @@ class enviarMensajes():
         elif len(self.poisVigilar) > 0:
             minPoi = getClosestPOI(self.bebop.current_position, self.poisVigilar)
             if minPoi is None:
-                return None
+                return self.bebop.poi_position
             self.poisVigilar.remove(minPoi)
             result = {"poi": minPoi, "type": POI_VIGILAR}
             self.nextState = ASIGNAR_POI
