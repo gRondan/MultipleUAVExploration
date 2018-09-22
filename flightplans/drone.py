@@ -28,6 +28,7 @@ class drone:
         self.max_altitude = properties.MAX_ALTITUDE
 
     def initialize(self, ip, port):
+        self.initSearchMapWithObstacles()
         if properties.ALGORITHM == SH_ORIGINAL:
             self.search_map[self.home[0]][self.home[1]] = 1
         elif properties.ALGORITHM == SH_TIMESTAMP:
@@ -41,6 +42,12 @@ class drone:
         # print(success)
         self.bebop.set_max_altitude(self.max_altitude)
         self.bebop.ask_for_state_update()
+
+    def initSearchMapWithObstacles(self):
+        print('obstaculos: ', self.obstaculos)
+        for obstacle in self.obstaculos:
+            print('obstacle: ',obstacle)
+            self.search_map[obstacle[0]][obstacle[1]] = -1 
 
     def take_off(self):
         self.bebop.safe_takeoff(10)
@@ -154,7 +161,9 @@ class drone:
     def validatePosition(self, x3, y3, forcePosition):
         condition = x3 >= 0 and y3 >= 0 and x3 < self.mapa_ancho and y3 < self.mapa_largo
         tupla = (x3, y3)
-        if (forcePosition is not None):
+        if self.pointIsObstacule(x3, y3):
+            return False
+        elif (forcePosition is not None):
             return (condition and self.minDistanceToTarget(self.home, self.current_position, tupla))
         elif self.poi_position is not None:
             return (condition and self.minDistanceToTarget(self.poi_position, self.current_position, tupla))
@@ -170,7 +179,6 @@ class drone:
         # print("distance1: " + str(distance1) + " distance2: " + str(distance2))
         return (distance1 <= distance2)
 
-#       aparentemente no se usa
     def pointIsObstacule(self, x1, x2):
         isObstacule = False
         for obs in self.obstaculos:
