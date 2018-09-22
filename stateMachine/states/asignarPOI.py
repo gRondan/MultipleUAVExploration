@@ -1,5 +1,5 @@
 from stateMachine.statesEnum import EXPLORAR, ASIGNAR_POI, CANCELAR_MISION, GENERAL
-from utils import cartesianDistance, createMessage, convertTupleToString
+from utils import cartesianDistance, createMessage, convertTupleToString, concatIpPort, parseIpPort
 from properties import DISTANCE_ENERGY_RATIO, LOW_BATTERY, WAIT_TIME, TIME_BETWEEN_POI_PING, SPHINX_SIMULATION, SYNC_ASIGNARPOI_MSG
 import threading
 from connections.message_type import AVAILABLE, UNAVAILABLE, DISTANCE, RESULT, POI_ALREADY_ASSIGNED, POI_ASSIGNED
@@ -38,27 +38,29 @@ class asignarPOI():
             self.assignedPOIs[self.poi] = self.bebop.ip
         else:
             if len(self.poiAlreadyAssigned) > 0 and self.previousState == CANCELAR_MISION:
-                print("self.poiAlreadyAssigned",self.poiAlreadyAssigned," self.previousState:", self.previousState)
+                print("self.poiAlreadyAssigned", self.poiAlreadyAssigned, " self.previousState:", self.previousState)
                 return None
 
             if len(self.availableDistances) > 0 or len(self.availableResults) > 0:
                 # im late to the party
-                print("self.availableDistances", self.availableDistances, "self.availableResults ",self.availableResults)
+                print("self.availableDistances", self.availableDistances, "self.availableResults ", self.availableResults)
                 return None
 
             connected_drones = self.client.check_friends()
             distance = cartesianDistance(self.poi, self.bebop.current_position)
             available_battery = self.bebop.getBatteryPercentage()
-
+            ipPort = dict({"ip": self.bebop.ip, "port": self.bebop.port})
             if available_battery - (distance / DISTANCE_ENERGY_RATIO) > LOW_BATTERY:
-                message = createMessage(ASIGNAR_POI, AVAILABLE, self.bebop.ip)
-                for ip in connected_drones:
-                    self.client.send_message(message)
-                self.availableDrones.append(self.bebop.ip)
+                message = createMessage(ASIGNAR_POI, AVAILABLE, ipPort)
+                self.availableDrones.append(ipPort)
+                for ipPort in connected_drones:
+                    # antes estaba send_message
+                    self.client.send_direct_message(message, ipPort["ip"], ipPort["port"])
             else:
-                message = createMessage(ASIGNAR_POI, UNAVAILABLE, self.bebop.ip)
-                for ip in connected_drones:
-                    self.client.send_message(message)
+                message = createMessage(ASIGNAR_POI, UNAVAILABLE, concatIpPort(self.bebop.ip, self.bebop.port))
+                for ipPort in connected_drones:
+                    # antes estaba send_message
+                    self.client.send_direct_message(message, ipPort["ip"], ipPort["port"])
                 return None
 
             timer1 = threading.Timer(WAIT_TIME, self.messageWaitTimeout)
@@ -76,8 +78,8 @@ class asignarPOI():
             self.timeout = False
             timer1.cancel()
             availableDronesNumber = len(self.availableDrones)
-
-            message2 = createMessage(ASIGNAR_POI, DISTANCE, dict({'ip': self.bebop.ip, 'distance': distance}))
+            distanceDict = dict({"distance": distance, "ip": self.bebop.ip, "port": self.bebop.port})
+            message2 = createMessage(ASIGNAR_POI, DISTANCE, distanceDict)
             self.messageMutex.acquire()
             # for ip in self.availableDrones:
             #     if ip != self.bebop.ip:
@@ -86,7 +88,7 @@ class asignarPOI():
             timer2 = threading.Timer(SYNC_ASIGNARPOI_MSG, self.messageWaitTimeout)
             timer2.start()
             conditionMet = False
-            self.availableDistances.append({"distance": distance, "ip": self.bebop.ip})
+            self.availableDistances.append(distanceDict)
             while not conditionMet and not self.timeout:
                 self.messageWait.acquire()
                 if self.blockHandleMessage.locked():
@@ -98,26 +100,32 @@ class asignarPOI():
             timer2.cancel()
             minDistance = distance
             minIp = self.bebop.ip
+            minPort = self.bebop.port
 
             self.messageMutex.acquire()
             print("self.availableDistances: ", self.availableDistances)
+            minimoEncontrado = dict({"ip": minIp, "port": minPort})
             for elem in self.availableDistances:
                 if elem["distance"] < minDistance:
                     minDistance = elem["distance"]
                     minIp = elem["ip"]
-                elif  elem["distance"] == minDistance:
-                    if self.isLower(elem["ip"], minIp):
+                    minPort = elem["port"]
+                elif elem["distance"] == minDistance:
+                    if self.isLower(elem, minimoEncontrado):
                         minDistance = elem["distance"]
                         minIp = elem["ip"]
-            message3 = createMessage(ASIGNAR_POI, RESULT, minIp)
-            for ip in self.availableDrones:
-                if ip != self.bebop.ip:
-                    self.client.send_direct_message(message3, ip)
+                        minPort = elem["port"]
+                        minimoEncontrado = dict({"ip": minIp, "port": minPort})
+            # minimoEncontrado = dict({"ip": minIp, "port": minPort})
+            message3 = createMessage(ASIGNAR_POI, RESULT, minimoEncontrado)
+            for ipPort in self.availableDrones:
+                if ipPort["ip"] != self.bebop.ip or ipPort["port"] != self.bebop.port:
+                    self.client.send_direct_message(message3, ipPort["ip"], ipPort["port"])
             self.messageMutex.release()
             timer3 = threading.Timer(SYNC_ASIGNARPOI_MSG, self.messageWaitTimeout)
             timer3.start()
             conditionMet = False
-            self.availableResults.append(minIp)
+            self.availableResults.append(minimoEncontrado)
             while not conditionMet and not self.timeout:
                 self.messageWait.acquire()
                 if self.blockHandleMessage.locked():
@@ -132,27 +140,28 @@ class asignarPOI():
             concensusValue = 0
             self.messageMutex.acquire()
             print("self.availableResults: ",self.availableResults)
-            for ip in self.availableDrones:
+            for ipPort in self.availableDrones:
                 count = 0
                 for elem in self.availableResults:
-                    if elem == ip:
+                    if elem == ipPort["ip"]:
                         count += 1
                 if count > concensusValue:
                     concensusValue = count
-                    concensus = ip
+                    concensus = ipPort
                 elif count == concensusValue:
-                    if self.isLower(ip, concensus):
+                    if self.isLower(ipPort, concensus):
                         concensusValue = count
-                        concensus = ip
+                        concensus = ipPort
             self.messageMutex.release()
-            if concensus == self.bebop.ip:
+            if concensus["ip"] == self.bebop.ip and concensus["port"] == self.bebop.port:
                 self.result = self.poiType
                 self.bebop.poi_position = self.poi
                 message4 = createMessage(GENERAL, POI_ASSIGNED, convertTupleToString(self.poi))
                 self.client.send_message(message4)
+            else:
+                timer2 = threading.Timer(TIME_BETWEEN_POI_PING, self.checkMissionStatus, (self.poi,))
+                timer2.start()
             self.assignedPOIs[convertTupleToString(self.poi)] = concensus
-            timer2 = threading.Timer(TIME_BETWEEN_POI_PING, self.checkMissionStatus, (self.poi,))
-            timer2.start()
             print("drone Asignado: ", concensus)
         print("POI ASignado: ", self.poi)
         return self.poi
@@ -162,16 +171,18 @@ class asignarPOI():
         if self.messageWait.locked():
             self.messageWait.release()
 
-    def isLower(self, ip1, ip2):
-        if ip2 == "":
+    def isLower(self, ipPort1, ipPort2):
+        if ipPort2 == "":
             return True
-        if SPHINX_SIMULATION:
-            print("isLower: ip1 ",ip1, " ip2 ", ip2)
-            return int(ip1) < int(ip2)
-        else:
-            str1 = ip1.split(".")[3]
-            str2 = ip2.split(".")[3]
-            return int(str1) < int(str2)
+        # if SPHINX_SIMULATION:
+        #     print("isLower: ip1 ",ip1, " ip2 ", ip2)
+        #     return int(ip1) < int(ip2)
+        # else:
+        ip1 = ipPort1["ip"].split(".")[3]
+        ip2 = ipPort2["ip"].split(".")[3]
+        port1 = ipPort1["port"]
+        port2 = ipPort2["port"]
+        return (int(ip1) < int(ip2)) or (int(ip1) == int(ip2) and int(port1) < int(port2))
 
 
     def handleMessage(self, message):
