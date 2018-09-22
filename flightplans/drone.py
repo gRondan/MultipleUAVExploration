@@ -27,7 +27,7 @@ class drone:
         self.obstaculos = properties.OBSTACLES
         self.max_altitude = properties.MAX_ALTITUDE
 
-    def initialize(self, ip):
+    def initialize(self, ip, port):
         self.initSearchMapWithObstacles()
         if properties.ALGORITHM == SH_ORIGINAL:
             self.search_map[self.home[0]][self.home[1]] = 1
