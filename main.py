@@ -1,7 +1,7 @@
 from flightplans import drone
 import threading
 from connections.server import server
-from properties import HOME, INIT_POI_POSITION, FOREVER_ALONE, OBSTACLES, SPHINX_SIMULATION, ALGORITHM
+from properties import HOME, INIT_POI_POSITION, FOREVER_ALONE, OBSTACLES, SPHINX_SIMULATION, ALGORITHM, ACTIVATE_GRAPHIC_MAP
 from stateMachine.stateMachine import stateMachine
 from enums import RANDOM, SH_ORIGINAL, SH_TIMESTAMP
 
@@ -17,7 +17,8 @@ def main(drone1):
     stateMachine1 = stateMachine(HOME, INIT_POI_POSITION, FOREVER_ALONE, drone1)
     server1 = server(drone1, stateMachine1)
     my_ip = server1.get_server_ip()
-    drone1.initialize(my_ip)
+    my_port = server1.get_server_port()
+    drone1.initialize(my_ip, my_port)
     client_handler = threading.Thread(
         target=server1.run_server,
         args=()
@@ -45,6 +46,8 @@ def plotMatrix(drone1):
     plt.ion()
     plt.show()
     plt.suptitle("Cubrimiento del mapa para el dron " + str(drone1.ip))
+    plt.ylim(0, int(drone1.mapa_ancho) - 1)
+    plt.xlim(0, int(drone1.mapa_largo) - 1)
     while True:
         display_matrix = drone1.search_map
         vmin = 0
@@ -73,7 +76,7 @@ connection2 = threading.Thread(
 connection.start()
 connection2.start()
 
-if SPHINX_SIMULATION:
+if SPHINX_SIMULATION and ACTIVATE_GRAPHIC_MAP:
     connection3 = threading.Thread(
         target=plotMatrix,
         args=(drone1,)

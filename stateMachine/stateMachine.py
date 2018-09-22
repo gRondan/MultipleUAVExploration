@@ -87,7 +87,7 @@ class stateMachine():
 
                 # currentState = POICriticoState.getNextState()
             elif self.currentState == CHEQUEAR_STATUS_MISION:
-                self.state = chequearStatusMision.chequearStatusMision(self.bebop, self.dataBuffer, self.previousState, self.client, self.checkMissionStatus, self.poisVigilar, self.messages[self.currentState])
+                self.state = chequearStatusMision.chequearStatusMision(self.bebop, self.dataBuffer, self.previousState, self.client, self.checkMissionStatus, self.poisVigilar, self.assignedPOIs, self.messages[self.currentState])
                 # currentState = chequearStatusState.getNextState()
             elif self.currentState == ATERRIZAR:
                 self.state = aterrizar.aterrizar(self.bebop, self.dataBuffer, self.previousState, self.endMision, self.messages[self.currentState])
@@ -144,7 +144,7 @@ class stateMachine():
                     timerPoi = Timer(POI_TIMERS[POI_POSITIONS.index(point)], self.poiVigilarTimeout, (point,))
                     timerPoi.start()
             elif message["message_type"] == MISSION_ABORTED:
-                self.checkPOIStatus(message["ip"], message["poi"])
+                self.checkPOIStatus(message["ip"], message["port"], message["poi"])
             elif message["message_type"] == POI_ASSIGNED:
                 point = convertStringToTuple(message["content"])
                 if point in self.poisCritico:
@@ -157,8 +157,9 @@ class stateMachine():
             self.messages[message["state"]].append(message)
         self.messageMutex.release()
 
-    def checkPOIStatus(self, ipDron, poi):
+    def checkPOIStatus(self, ipDron, portDron, poi):
         if poi in self.assignedPOIs:
+            # TODO
             if self.assignedPOIs[poi][0] == ipDron:
                 self.POIsToAssign.append(poi)
             else:

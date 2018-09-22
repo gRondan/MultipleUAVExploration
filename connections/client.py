@@ -1,6 +1,6 @@
 import socket
 from properties import PORT, INTERFACE, IP_BASE, NETMASK, PING_TIMEOUT, SPHINX_SIMULATION
-from pyparrot.networking.connectionProperties import SPHINX_FRIENDS, SPHINX_PORT
+from pyparrot.networking.connectionProperties import SPHINX_FRIENDS_IP, SPHINX_PORT, SPHINX_FRIENDS_PORTS
 import ipaddress
 import threading
 from subprocess import Popen, PIPE
@@ -11,7 +11,7 @@ import json
 port = SPHINX_PORT
 net_ip = '127.0.0.1'
 if not SPHINX_SIMULATION:
-    port = PORT
+    # port = PORT
     net_ip = IP_BASE
 interface = INTERFACE
 netmask = NETMASK
@@ -36,19 +36,21 @@ class client:
 
     def check_friends(self):
         cont = []
+        currentPosition = 0
         print("check_friends")
         for ip in self.friends:
             print("ip: ", ip)
             status = self.check_connection(ip)
             if status == 0:
-                cont.append(ip)
+                cont.append(dict({"ip": ip, "port": self.friendsPorts[currentPosition]}))
+            currentPosition += 1
         return cont
 
     def search_friends(self, my_ip):
         time.sleep(5)
         if SPHINX_SIMULATION:
-            print('friend ports: ', SPHINX_FRIENDS)
-            self.friends = SPHINX_FRIENDS
+            self.friends = SPHINX_FRIENDS_IP
+            self.friendsPorts = SPHINX_FRIENDS_PORTS
         else:
             for i in self.network.hosts():
                 i = str(i)
@@ -59,16 +61,17 @@ class client:
                     if hostalive == 0:
                         print(i, 'IS REACHABLE')
                         self.friends.append(i)
+                        self.friendsPorts.append(PORT)
                     else:
                         print(i, 'is unreachable')
 
-    def client_request(self, ip_address, msj):
+    def client_request(self, ip_address, port, msj):
         # try:
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        if SPHINX_SIMULATION:
-            client.connect(('127.0.0.1', int(ip_address)))
-        else:
-            client.connect((ip_address, port))
+        # if SPHINX_SIMULATION:
+        #     client.connect(('127.0.0.1', int(ip_address)))
+        # else:
+        client.connect((ip_address, port))
         client.send(str.encode(msj))
         response = client.recv(4096)
         print(response)
@@ -81,18 +84,21 @@ class client:
         def send_message_thread(self, msj_dict):
             msj = json.dumps(msj_dict)
             print("client send_message self.friends:", self.friends)
+            currentPosition = 0
             for ip in self.friends:
+                port = self.friendsPorts[currentPosition]
+                currentPosition += 1
                 print("client send_message ip:", ip)
                 ip = str(ip)
                 hostalive = self.check_connection(ip)
                 if hostalive == 0:
                     print(ip, 'enviado mensaje')
-                    self.client_request(ip, msj)
+                    self.client_request(ip, port, msj)
                 else:
                     print(ip, 'no se encontro el dron')
                     handler = threading.Thread(
                         target=self.reconect,
-                        args=(msj, ip,)
+                        args=(msj, ip, port,)
                     )
                     handler.start()
         handler = threading.Thread(
@@ -101,34 +107,35 @@ class client:
         )
         handler.start()
 
-    def send_direct_message(self, msj, ip):
-        print("client send_direct_message:", msj, " ip: ",ip)
-        def send_message_thread(self, msj_dict, ip):
+    def send_direct_message(self, msj, ip, port=PORT):
+        print("client send_direct_message:", msj, " ip: ", ip)
+
+        def send_message_thread(self, msj_dict, ip, port):
             msj = json.dumps(msj_dict)
             ip = str(ip)
             hostalive = self.check_connection(ip)
             if hostalive == 0:
                 print(ip, 'enviado mensaje')
-                self.client_request(ip, msj)
+                self.client_request(ip, port, msj)
             else:
                 print(ip, 'no se encontro el dron')
                 handler = threading.Thread(
                     target=self.reconect,
-                    args=(msj, ip,)
+                    args=(msj, ip, port)
                 )
                 handler.start()
         handler = threading.Thread(
             target=send_message_thread,
-            args=(self, msj, ip,)
+            args=(self, msj, ip, port,)
         )
         handler.start()
 
-    def reconect(self, msj, ip):
+    def reconect(self, msj, ip, port):
         found = False
         while not found:
             time.sleep(5)
             hostalive = self.check_connection(ip)
             if hostalive == 0:
                 print(ip, 'reconexion exitosa')
-                self.client_request(ip, msj)
+                self.client_request(ip, port, msj)
                 found = True
