@@ -1,5 +1,8 @@
 import math
 
+# CONSTANTS
+ipPortSplitter = ":"
+
 
 def printMatrix(matrix):
     s = [[str(e) for e in row] for row in matrix]
@@ -46,3 +49,11 @@ def getClosestPOI(current_position, pois):
 
 def createMessage(state, message_type, message_content, idMessage=0):
     return dict({"state": state, "message_type": message_type, "content": message_content, "message_id": idMessage})
+
+
+def concatIpPort(ip, port):
+    return ip + ipPortSplitter + port
+
+
+def parseIpPort(ipPort):
+    return dict({"ip": ipPort.split(ipPortSplitter)[0], "port": ipPort.split(ipPortSplitter)[1]})
