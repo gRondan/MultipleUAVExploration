@@ -45,6 +45,7 @@ def plotMatrix(drone1):
     plt.ion()
     plt.show()
     plt.suptitle("Cubrimiento del mapa para el dron " + str(drone1.ip))
+    plt.ylim(0, int(drone1.mapa_ancho)-1)
     while True:
         display_matrix = drone1.search_map
         vmin = 0
