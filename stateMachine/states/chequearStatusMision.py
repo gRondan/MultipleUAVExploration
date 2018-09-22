@@ -7,11 +7,12 @@ import threading
 
 
 class chequearStatusMision():
-    def __init__(self, bebop, dataBuffer, previousState, client, checkMissionStatus, poisVigilar, messages):
+    def __init__(self, bebop, dataBuffer, previousState, client, checkMissionStatus, poisVigilar, assignedPOIs, messages):
         self.messages = messages
         self.client = client
         self.nextState = dataBuffer
         self.poisVigilar = poisVigilar
+        self.assignedPOIs = assignedPOIs
         self.checkMissionStatus = checkMissionStatus
 
     def getNextState(self):
@@ -20,7 +21,7 @@ class chequearStatusMision():
     def execute(self):
         result = []
         for key in self.poisVigilar:
-            if client.check_connection(self.poisToCheck[key]) == 0:
+            if client.check_connection(self.assignedPOIs[key]["ip"]) == 0:
                 client.send_message(createMessage(ASIGNAR_POI, MISSION_OK, key))
                 self.poisVigilar.remove(key)
                 timer2 = threading.Timer(TIME_BETWEEN_POI_PING, self.checkMissionStatus, (convertStringToTuple(key),))

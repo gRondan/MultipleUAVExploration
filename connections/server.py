@@ -27,10 +27,13 @@ class server:
         self.port = port
 
     def get_server_ip(self):
-        if SPHINX_SIMULATION:
-            return self.port
-        else:
-            return self.ip
+        # if SPHINX_SIMULATION:
+        #     return self.port
+        # else:
+        return self.ip
+
+    def get_server_port(self):
+        return self.port
 
     def run_server(self):
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

@@ -17,6 +17,7 @@ class drone:
         self.mapa_largo = properties.MAPA_LARGO / self.rango_largo
         self.mapa_ancho = properties.MAPA_ANCHO / self.rango_ancho
         self.ip = None
+        self.port = None
         self.search_map = [[0 for j in range(int(self.mapa_largo))]for i in range(int(self.mapa_ancho))]
         self.current_position = home
         self.mutex_search_map = threading.Lock()
@@ -26,7 +27,7 @@ class drone:
         self.obstaculos = properties.OBSTACLES
         self.max_altitude = properties.MAX_ALTITUDE
 
-    def initialize(self, ip):
+    def initialize(self, ip, port):
         if properties.ALGORITHM == SH_ORIGINAL:
             self.search_map[self.home[0]][self.home[1]] = 1
         elif properties.ALGORITHM == SH_TIMESTAMP:
@@ -35,6 +36,7 @@ class drone:
         elif properties.ALGORITHM == RANDOM:
             self.search_map[self.home[0]][self.home[1]] = 1
         self.ip = ip
+        self.port = port
         # success = self.bebop.connect(10)
         # print(success)
         self.bebop.set_max_altitude(self.max_altitude)
