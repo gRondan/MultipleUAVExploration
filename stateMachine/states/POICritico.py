@@ -17,6 +17,7 @@ class POICritico():
         finalPosition = self.position_poi
         pathfinder = Pathfinder(initialPosition, finalPosition)
         pathToFollow = pathfinder.findPath()
+        pathfinder.printFinalMap()
         self.bebop.moveToPoiCritico(pathfinder.parsePathToCoordinates(pathToFollow))
         return self.position_poi
 
