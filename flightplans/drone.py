@@ -20,6 +20,7 @@ class drone:
         self.port = None
         self.search_map = [[0 for j in range(int(self.mapa_largo))]for i in range(int(self.mapa_ancho))]
         self.current_position = home
+        self.current_rotation = math.pi / 2
         self.mutex_search_map = threading.Lock()
         self.poi_position = None
         self.home = home
@@ -46,8 +47,8 @@ class drone:
     def initSearchMapWithObstacles(self):
         print('obstaculos: ', self.obstaculos)
         for obstacle in self.obstaculos:
-            print('obstacle: ',obstacle)
-            self.search_map[obstacle[0]][obstacle[1]] = -1 
+            print('obstacle: ', obstacle)
+            self.search_map[obstacle[0]][obstacle[1]] = -1
 
     def take_off(self):
         self.bebop.safe_takeoff(10)
@@ -58,10 +59,17 @@ class drone:
     def move(self, new_position):
         print("new position: ", new_position)
         print("current_position: ", self.current_position)
-        dx, dy = new_position[0] - self.current_position[0], new_position[1] - self.current_position[1]
-        real_dx, real_dy = dx * self.rango_ancho, dy * self.rango_largo
         verticalMove = self.getDronVerticalAlignment()
-        self.bebop.move_relative(real_dx, real_dy, verticalMove, 0)
+        if properties.ROTATE:
+            rotation_diff = utils.angleDifference(self.current_position, new_position, self.current_rotation)
+            distance_diff = utils.cartesianDistance(self.current_position, new_position)
+            self.bebop.move_relative(0, 0, 0, rotation_diff)
+            self.bebop.move_relative(distance_diff, 0, verticalMove, 0)
+            self.bebop.current_rotation += rotation_diff
+        else:
+            dx, dy = new_position[0] - self.current_position[0], new_position[1] - self.current_position[1]
+            real_dx, real_dy = dx * self.rango_ancho, dy * self.rango_largo
+            self.bebop.move_relative(real_dx, real_dy, verticalMove, 0)
         time.sleep(2)
         self.current_position = new_position
         self.mutex_search_map.acquire()
@@ -215,7 +223,7 @@ class drone:
         droneAltitudeStatus = self.checkDroneAltitudeStatus()
         verticalAlignment = 0
         if (droneAltitudeStatus == TOO_LOW or droneAltitudeStatus == TOO_HIGH):
-            #negative goes up, positive goes down
+            # negative goes up, positive goes down
             verticalAlignment = self.getDroneAltitude() - properties.OPTIMAL_ALTITUDE
         else:
             verticalAlignment = 0
