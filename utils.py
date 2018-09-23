@@ -37,9 +37,31 @@ def cartesianDistance(tuple1, tuple2):
 
 
 def angleDifference(tuple1, tuple2, current_rotation):
-    tuple3 = (tuple1[0] + math.cos(current_rotation), tuple1[1] + math.sin(current_rotation))
-    d12, d13, d23 = cartesianDistance(tuple1, tuple2), cartesianDistance(tuple1, tuple3), cartesianDistance(tuple2, tuple3)
-    return math.acos((d12**2 + d13**2 - d23**2) / (2 * d12 * d13))
+    # tuple3 = (tuple1[0] + math.cos(current_rotation), tuple1[1] + math.sin(current_rotation))
+    # d12, d13, d23 = cartesianDistance(tuple1, tuple2), cartesianDistance(tuple1, tuple3), cartesianDistance(tuple2, tuple3)
+    # return math.acos((d12**2 + d13**2 - d23**2) / (2 * d12 * d13))
+    angle = 0
+    dx, dy = tuple2[0] - tuple1[0], tuple2[1] - tuple1[1]
+    if dx > 0:
+        if dy > 0:
+            angle = math.pi / 4
+        elif dy == 0:
+            angle = math.pi / 2
+        elif dy < 0:
+            angle = math.pi * 3 / 4
+    elif dx == 0:
+        if dy > 0:
+            angle = 0
+        elif dy < 0:
+            angle = math.pi
+    elif dx < 0:
+        if dy > 0:
+            angle = - math.pi / 4
+        elif dy == 0:
+            angle = - math.pi / 2
+        elif dy < 0:
+            angle = math.pi * 3 / 4
+    return current_rotation - angle
 
 
 def getClosestPOI(current_position, pois):
