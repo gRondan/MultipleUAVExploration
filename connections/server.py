@@ -17,10 +17,9 @@ class server:
         self.stateMachine = stateMachine
         self.endServer = False
         self.mutex = Lock()
-        ip = '127.0.0.1'
+        ip = ni.ifaddresses(INTERFACE)[ni.AF_INET][0]['addr']
         port = SPHINX_PORT
         if not SPHINX_SIMULATION:
-            ip = ni.ifaddresses(INTERFACE)[ni.AF_INET][0]['addr']
             port = PORT
         print("Server IP: ", ip, port)
         self.ip = ip

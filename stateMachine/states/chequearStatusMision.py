@@ -1,7 +1,7 @@
 from connections import client
 from connections.message_type import MISSION_OK
 from stateMachine.statesEnum import ASIGNAR_POI, POI_CRITICO
-from utils import createMessage, convertStringToTuple, getClosestPOI
+from utils import createMessage, convertStringToTuple, getClosestPOI, convertTupleToString
 from properties import TIME_BETWEEN_POI_PING
 import threading
 
@@ -9,6 +9,7 @@ import threading
 class chequearStatusMision():
     def __init__(self, bebop, dataBuffer, previousState, client, checkMissionStatus, poisVigilar, assignedPOIs, messages):
         self.messages = messages
+        self.bebop = bebop
         self.client = client
         self.nextState = dataBuffer
         self.poisVigilar = poisVigilar
@@ -21,14 +22,14 @@ class chequearStatusMision():
     def execute(self):
         result = []
         for key in self.poisVigilar:
-            if client.check_connection(self.assignedPOIs[key]["ip"]) == 0:
-                client.send_message(createMessage(ASIGNAR_POI, MISSION_OK, key))
+            if self.client.check_connection(self.assignedPOIs[convertTupleToString(key)]["ip"]) == 0:
+                self.client.send_message(createMessage(ASIGNAR_POI, MISSION_OK, key))
                 self.poisVigilar.remove(key)
-                timer2 = threading.Timer(TIME_BETWEEN_POI_PING, self.checkMissionStatus, (convertStringToTuple(key),))
+                timer2 = threading.Timer(TIME_BETWEEN_POI_PING, self.checkMissionStatus, (key,))
                 timer2.start()
             else:
                 self.nextState = ASIGNAR_POI
-                result.append(convertStringToTuple(key))
+                result.append(key)
         minPoi = getClosestPOI(self.bebop.current_position, result)
         if minPoi is None:
             return None

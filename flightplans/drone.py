@@ -49,7 +49,7 @@ class drone:
         print('obstaculos: ', self.obstaculos)
         for obstacle in self.obstaculos:
             print('obstacle: ',obstacle)
-            self.search_map[obstacle[0]][obstacle[1]] = -1 
+            self.search_map[obstacle[0]][obstacle[1]] = -1
 
     def take_off(self):
         self.bebop.safe_takeoff(10)
@@ -202,6 +202,7 @@ class drone:
         self.mutex_search_map.release()
 
     def getDroneAltitude(self):
+        print("altura", self.bebop.sensors.sensors_dict["AltitudeChanged_altitude"])
         return self.bebop.sensors.sensors_dict["AltitudeChanged_altitude"]
 
     def checkDroneAltitudeStatus(self):
