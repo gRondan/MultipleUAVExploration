@@ -28,19 +28,19 @@ def main(drone):
 
 	drone.bebop.smart_sleep(1)
 	verticalMove = drone.getDronVerticalAlignment()
-	drone.bebop.move_relative(6, 0, verticalMove, 0)
+	drone.bebop.move_relative(3, 0, verticalMove, 0)
 
 	drone.bebop.smart_sleep(1)
 	verticalMove = drone.getDronVerticalAlignment()
-	drone.bebop.move_relative(0, -6, verticalMove, 0)
+	drone.bebop.move_relative(0, -3, verticalMove, 0)
 
 	drone.bebop.smart_sleep(1)
 	verticalMove = drone.getDronVerticalAlignment()
-	drone.bebop.move_relative(-6, 0, verticalMove, 0)
+	drone.bebop.move_relative(-3, 0, verticalMove, 0)
 
 	drone.bebop.smart_sleep(1)
 	verticalMove = drone.getDronVerticalAlignment()
-	drone.bebop.move_relative(0, 6, verticalMove, 0)
+	drone.bebop.move_relative(0, 3, verticalMove, 0)
 
 	drone.bebop.smart_sleep(1)
 	drone.bebop.safe_land(10)

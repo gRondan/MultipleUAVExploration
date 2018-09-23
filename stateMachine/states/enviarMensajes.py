@@ -1,6 +1,6 @@
 from stateMachine.statesEnum import CHEQUEAR_STATUS_MISION, DESPLAZARSE_SIN_CONEXION, MISION_FINALIZADA, GENERAL, BATERIA_BAJA, BATERIA_CRITICA, POI_CRITICO, POI_VIGILAR, ASIGNAR_POI
 from batteryEnum import LOW, NORMAL
-from utils import createMessage, getClosestPOI
+from utils import createMessage, getClosestPOI, convertStringToTuple
 from connections.message_type import UPDATE_MAP
 import utils
 from properties import POI_POSITIONS
@@ -52,7 +52,8 @@ class enviarMensajes():
         print("isChequearMision self.assignedPOIs", self.assignedPOIs, " self.poisVigilar ", self.poisVigilar, " self.poisCritico ", self.poisCritico)
         if not self.isAlone:
             for key in self.assignedPOIs:
-                if (key in self.poisVigilar or key in self.poisCritico):
+                poi = convertStringToTuple(key)
+                if (poi in self.poisVigilar) or (poi in self.poisCritico):
                     checkStatusNextState = self.nextState
                     self.nextState = CHEQUEAR_STATUS_MISION
                     return checkStatusNextState
