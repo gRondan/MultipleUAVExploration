@@ -158,9 +158,8 @@ class asignarPOI():
                 self.bebop.poi_position = self.poi
                 message4 = createMessage(GENERAL, POI_ASSIGNED, convertTupleToString(self.poi))
                 self.client.send_message(message4)
-            else:
-                timer2 = threading.Timer(TIME_BETWEEN_POI_PING, self.checkMissionStatus, (self.poi,))
-                timer2.start()
+            timer2 = threading.Timer(TIME_BETWEEN_POI_PING, self.checkMissionStatus, (self.poi,))
+            timer2.start()
             self.assignedPOIs[convertTupleToString(self.poi)] = concensus
             print("drone Asignado: ", concensus)
         print("POI ASignado: ", self.poi)

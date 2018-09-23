@@ -9,7 +9,7 @@ asignarPOI, aterrizar, bateriaBaja, bateriaCritica, cancelarMision, chequearStat
 despegar, desplazarse, enviarMensajes, explorar, fin, inicio, misionFinalizada, POICritico,
 POIVigilar, pingSinConexion, cargarBateria, desplazarseSinConexion)
 from properties import TIMEOUT, POI_CRITICO_TIMERS, POI_POSITIONS, POI_TIMERS
-from utils import createMessage, convertStringToTuple
+from utils import createMessage, convertStringToTuple, convertTupleToString
 from connections.message_type import UPDATE_MAP, MISSION_ABORTED, POI_ALREADY_ASSIGNED, POI_ASSIGNED
 import stateMachine.statesEnum as enum
 from threading import Timer, Lock
@@ -166,7 +166,8 @@ class stateMachine():
                 self.client.send_direct_message(createMessage(ASIGNAR_POI, POI_ALREADY_ASSIGNED, "go back to explore"), ipDron)
 
     def checkMissionStatus(self, poi):
-        if (poi in self.assignedPOIs):
+        print("checkMissionStatus","poi",poi," self.assignedPOIs ",self.assignedPOIs)
+        if (convertTupleToString(poi) in self.assignedPOIs):
             self.poisVigilar.append(poi)
 
     def poiVigilarTimeout(self, poi):
