@@ -1,6 +1,6 @@
 from stateMachine.statesEnum import CHEQUEAR_STATUS_MISION, DESPLAZARSE_SIN_CONEXION, MISION_FINALIZADA, GENERAL, BATERIA_BAJA, BATERIA_CRITICA, POI_CRITICO, POI_VIGILAR, ASIGNAR_POI
 from batteryEnum import LOW, NORMAL
-from utils import createMessage, getClosestPOI
+from utils import createMessage, getClosestPOI, convertStringToTuple
 from connections.message_type import UPDATE_MAP
 import utils
 from properties import POI_POSITIONS
@@ -34,24 +34,24 @@ class enviarMensajes():
                 self.nextState = DESPLAZARSE_SIN_CONEXION
                 return self.client
             if self.bebop.poi_position is not None:
-                print("self.bebop.poi_position", self.bebop.poi_position, " self.poisCritico ",self.poisCritico)
                 if self.bebop.poi_position in self.poisCritico:
                     self.nextState = POI_CRITICO
                 else:
                     self.nextState = POI_VIGILAR
                 return self.bebop.poi_position
-            poi = self.isAsignarPOI()
-            if poi is not None:
-                return poi
+            isChequearMisionResult = self.isChequearMision()
+            if isChequearMisionResult is not None:
+                return isChequearMisionResult
             else:
-                return self.isChequearMision()
+                return self.isAsignarPOI()
         return None
 
 #       si para algun POI ya asignado se cumple que salto su timer de chequee voy al estado chequearStatusMision
     def isChequearMision(self):
         if not self.isAlone:
             for key in self.assignedPOIs:
-                if (key in self.poisVigilar or key in self.poisCritico):
+                poi = convertStringToTuple(key)
+                if (poi in self.poisVigilar) or (poi in self.poisCritico):
                     checkStatusNextState = self.nextState
                     self.nextState = CHEQUEAR_STATUS_MISION
                     return checkStatusNextState
@@ -59,7 +59,6 @@ class enviarMensajes():
 
     def isAsignarPOI(self):
         result = None
-        print("isAsignarPOI ", "self.poisCritico ", self.poisCritico, " self.poisVigilar ", self.poisVigilar)
         if len(self.poisCritico) > 0:
             minPoi = getClosestPOI(self.bebop.current_position, self.poisCritico)
             if minPoi is None:

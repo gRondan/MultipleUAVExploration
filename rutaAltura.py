@@ -1,6 +1,7 @@
 from threading import Thread
 from flightplans import drone
 import math
+from properties import HOME
 
 drone1 = drone.drone(HOME)
 
@@ -21,26 +22,26 @@ def main(drone):
 	print("RUTA 2 STARTING")
 	drone.bebop.smart_sleep(1)
 
-	drone.bebop.set_max_altitude(self.max_altitude)
+	drone.bebop.set_max_altitude(drone.max_altitude)
 	drone.bebop.ask_for_state_update()
 
 	drone.bebop.safe_takeoff(10)
 
 	drone.bebop.smart_sleep(1)
 	verticalMove = drone.getDronVerticalAlignment()
-	drone.bebop.move_relative(3, 0, verticalMove, 0)
+	drone.bebop.move_relative(6, 0, verticalMove, 0)
 
 	drone.bebop.smart_sleep(1)
 	verticalMove = drone.getDronVerticalAlignment()
-	drone.bebop.move_relative(0, -3, verticalMove, 0)
+	drone.bebop.move_relative(0, -6, verticalMove, 0)
 
 	drone.bebop.smart_sleep(1)
 	verticalMove = drone.getDronVerticalAlignment()
-	drone.bebop.move_relative(-3, 0, verticalMove, 0)
+	drone.bebop.move_relative(-6, 0, verticalMove, 0)
 
 	drone.bebop.smart_sleep(1)
 	verticalMove = drone.getDronVerticalAlignment()
-	drone.bebop.move_relative(0, 3, verticalMove, 0)
+	drone.bebop.move_relative(0, 6, verticalMove, 0)
 
 	drone.bebop.smart_sleep(1)
 	drone.bebop.safe_land(10)
