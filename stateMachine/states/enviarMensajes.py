@@ -40,15 +40,16 @@ class enviarMensajes():
                 else:
                     self.nextState = POI_VIGILAR
                 return self.bebop.poi_position
-            poi = self.isAsignarPOI()
-            if poi is not None:
-                return poi
+            isChequearMisionResult = self.isChequearMision()
+            if isChequearMisionResult is not None:
+                return isChequearMisionResult
             else:
-                return self.isChequearMision()
+                return self.isAsignarPOI()
         return None
 
 #       si para algun POI ya asignado se cumple que salto su timer de chequee voy al estado chequearStatusMision
     def isChequearMision(self):
+        print("isChequearMision self.assignedPOIs", self.assignedPOIs, " self.poisVigilar ", self.poisVigilar, " self.poisCritico ", self.poisCritico)
         if not self.isAlone:
             for key in self.assignedPOIs:
                 if (key in self.poisVigilar or key in self.poisCritico):
