@@ -34,7 +34,6 @@ class enviarMensajes():
                 self.nextState = DESPLAZARSE_SIN_CONEXION
                 return self.client
             if self.bebop.poi_position is not None:
-                print("self.bebop.poi_position", self.bebop.poi_position, " self.poisCritico ",self.poisCritico)
                 if self.bebop.poi_position in self.poisCritico:
                     self.nextState = POI_CRITICO
                 else:
@@ -49,7 +48,6 @@ class enviarMensajes():
 
 #       si para algun POI ya asignado se cumple que salto su timer de chequee voy al estado chequearStatusMision
     def isChequearMision(self):
-        print("isChequearMision self.assignedPOIs", self.assignedPOIs, " self.poisVigilar ", self.poisVigilar, " self.poisCritico ", self.poisCritico)
         if not self.isAlone:
             for key in self.assignedPOIs:
                 poi = convertStringToTuple(key)
@@ -61,7 +59,6 @@ class enviarMensajes():
 
     def isAsignarPOI(self):
         result = None
-        print("isAsignarPOI ", "self.poisCritico ", self.poisCritico, " self.poisVigilar ", self.poisVigilar)
         if len(self.poisCritico) > 0:
             minPoi = getClosestPOI(self.bebop.current_position, self.poisCritico)
             if minPoi is None:

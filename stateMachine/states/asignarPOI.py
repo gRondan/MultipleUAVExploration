@@ -38,12 +38,10 @@ class asignarPOI():
             self.assignedPOIs[self.poi] = self.bebop.ip
         else:
             if len(self.poiAlreadyAssigned) > 0 and self.previousState == CANCELAR_MISION:
-                print("self.poiAlreadyAssigned", self.poiAlreadyAssigned, " self.previousState:", self.previousState)
                 return None
 
             if len(self.availableDistances) > 0 or len(self.availableResults) > 0:
                 # im late to the party
-                print("self.availableDistances", self.availableDistances, "self.availableResults ", self.availableResults)
                 return None
 
             connected_drones = self.client.check_friends()
@@ -103,7 +101,6 @@ class asignarPOI():
             minPort = self.bebop.port
 
             self.messageMutex.acquire()
-            print("self.availableDistances: ", self.availableDistances)
             minimoEncontrado = dict({"ip": minIp, "port": minPort})
             for elem in self.availableDistances:
                 if elem["distance"] < minDistance:
@@ -139,7 +136,6 @@ class asignarPOI():
             concensus = ''
             concensusValue = 0
             self.messageMutex.acquire()
-            print("self.availableResults: ",self.availableResults)
             for ipPort in self.availableDrones:
                 count = 0
                 for elem in self.availableResults:
@@ -185,7 +181,6 @@ class asignarPOI():
 
 
     def handleMessage(self, message):
-        print("handleMessage: ", message)
         self.blockHandleMessage.acquire()
         self.messageMutex.acquire()
         if message["message_type"] == AVAILABLE:
