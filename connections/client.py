@@ -79,20 +79,15 @@ class client:
         #     pass
 
     def send_message(self, msj):
-        print("client send_message:", msj)
-
         def send_message_thread(self, msj_dict):
             msj = json.dumps(msj_dict)
-            print("client send_message self.friends:", self.friends)
             currentPosition = 0
             for ip in self.friends:
                 port = self.friendsPorts[currentPosition]
                 currentPosition += 1
-                print("client send_message ip:", ip)
                 ip = str(ip)
                 hostalive = self.check_connection(ip)
                 if hostalive == 0:
-                    print(ip, 'enviado mensaje')
                     self.client_request(ip, port, msj)
                 else:
                     print(ip, 'no se encontro el dron')
@@ -108,14 +103,11 @@ class client:
         handler.start()
 
     def send_direct_message(self, msj, ip, port=PORT):
-        print("client send_direct_message:", msj, " ip: ", ip)
-
         def send_message_thread(self, msj_dict, ip, port):
             msj = json.dumps(msj_dict)
             ip = str(ip)
             hostalive = self.check_connection(ip)
             if hostalive == 0:
-                print(ip, 'enviado mensaje')
                 self.client_request(ip, port, msj)
             else:
                 print(ip, 'no se encontro el dron')

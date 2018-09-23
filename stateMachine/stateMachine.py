@@ -9,7 +9,7 @@ asignarPOI, aterrizar, bateriaBaja, bateriaCritica, cancelarMision, chequearStat
 despegar, desplazarse, enviarMensajes, explorar, fin, inicio, misionFinalizada, POICritico,
 POIVigilar, pingSinConexion, cargarBateria, desplazarseSinConexion)
 from properties import TIMEOUT, POI_CRITICO_TIMERS, POI_POSITIONS, POI_TIMERS
-from utils import createMessage, convertStringToTuple
+from utils import createMessage, convertStringToTuple, convertTupleToString
 from connections.message_type import UPDATE_MAP, MISSION_ABORTED, POI_ALREADY_ASSIGNED, POI_ASSIGNED
 import stateMachine.statesEnum as enum
 from threading import Timer, Lock
@@ -132,7 +132,6 @@ class stateMachine():
     # server related methods
     def handleMessage(self, message):
         self.messageMutex.acquire()
-        print("handleMessage: ", message)
         if message["state"] == GENERAL:
             if message["message_type"] == UPDATE_MAP:
                 point = convertStringToTuple(message["content"])
@@ -166,18 +165,15 @@ class stateMachine():
                 self.client.send_direct_message(createMessage(ASIGNAR_POI, POI_ALREADY_ASSIGNED, "go back to explore"), ipDron)
 
     def checkMissionStatus(self, poi):
-        if (poi in self.assignedPOIs):
+        if (convertTupleToString(poi) in self.assignedPOIs):
             self.poisVigilar.append(poi)
 
     def poiVigilarTimeout(self, poi):
-        print("poiVigilarTimeout: ", poi)
         self.poisVigilar.append(poi)
-        print("POI_CRITICO_TIMERS[POI_POSITIONS.index(poi)] ", POI_CRITICO_TIMERS[POI_POSITIONS.index(poi)], " poi ", poi)
         poiCriticoTimer = Timer(POI_CRITICO_TIMERS[POI_POSITIONS.index(poi)], self.poiCriticoTimeout, (poi,))
         poiCriticoTimer.start()
 
     def poiCriticoTimeout(self, poi):
-        print("poiCriticoTimeout: ", poi, "self.poisVigilar", self.poisVigilar, "self.poisCritico", self.poisCritico, "self.assignedPOIs", self.assignedPOIs)
         encontre = False
         if poi in self.poisVigilar:
             encontre = True

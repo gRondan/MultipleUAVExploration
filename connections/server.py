@@ -17,10 +17,9 @@ class server:
         self.stateMachine = stateMachine
         self.endServer = False
         self.mutex = Lock()
-        ip = '127.0.0.1'
+        ip = ni.ifaddresses(INTERFACE)[ni.AF_INET][0]['addr']
         port = SPHINX_PORT
         if not SPHINX_SIMULATION:
-            ip = ni.ifaddresses(INTERFACE)[ni.AF_INET][0]['addr']
             port = PORT
         print("Server IP: ", ip, port)
         self.ip = ip
@@ -40,12 +39,10 @@ class server:
         server.bind((self.ip, self.port))
         server.listen(5)  # max backlog of connections
         addr = server.getsockname()
-        print('Listening: ' + str(addr[1]))
         end = False
 
         def handle_client_connection(self, client_socket, drone, stateMachine):
             request = client_socket.recv(1024)
-            print('Received {}'.format(request))
             client_socket.send(str.encode('ACK!'))
             client_socket.close()
             received_message_str = request.decode("utf-8")
@@ -59,7 +56,6 @@ class server:
 
         while not end:
             client_sock, address = server.accept()
-            print('Accepted connection from {}:{}'.format(address[0], address[1]))
             client_handler = threading.Thread(
                 target=handle_client_connection,
                 args=(self, client_sock, drone, self.stateMachine,)

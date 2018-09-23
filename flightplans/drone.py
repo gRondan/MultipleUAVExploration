@@ -43,6 +43,8 @@ class drone:
         # print(success)
         self.bebop.set_max_altitude(self.max_altitude)
         self.bebop.ask_for_state_update()
+        if properties.STREAMING_MODE_ON:
+            self.initializeStreaming()
 
     def initSearchMapWithObstacles(self):
         print('obstaculos: ', self.obstaculos)
@@ -208,6 +210,7 @@ class drone:
         self.mutex_search_map.release()
 
     def getDroneAltitude(self):
+        print("altura", self.bebop.sensors.sensors_dict["AltitudeChanged_altitude"])
         return self.bebop.sensors.sensors_dict["AltitudeChanged_altitude"]
 
     def checkDroneAltitudeStatus(self):
@@ -266,4 +269,22 @@ class drone:
         self.current_position = new_position
 
     def disconnect(self):
+        if properties.STREAMING_MODE_ON:
+            self.closeStreaming()
         self.bebop.disconnect()
+
+    def initializeStreaming(self):
+        print("-- Starting Streaming... --")
+        self.bebop.set_video_resolutions('rec720_stream720')
+        self.bebop.start_video_stream()
+        print("-- Streaming Started! --")
+
+    def closeStreaming(self):
+        print("-- Stopping Streaming... --")
+        self.bebop.stop_video_stream()
+        print("-- Streaming stopped!")
+
+
+
+
+

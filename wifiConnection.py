@@ -301,7 +301,8 @@ class WifiConnection:
         print (self.connection_info.address, self.connection_info.port)
         print(ipaddress.IPv4Address(self.connection_info.address))
         self.drone_ip = ipaddress.IPv4Address(self.connection_info.address).exploded
-        self.drone_ip = INTERNAL_TCP_IP
+        if INTERNAL_TCP_IP is not None:
+            self.drone_ip = INTERNAL_TCP_IP
         print("self.drone_ip", self.drone_ip, "self.connection_info.port)", self.connection_info.port)
         # connect
         tcp_sock.connect((self.drone_ip, self.connection_info.port))
