@@ -8,6 +8,7 @@ from pyparrot.Bebop import Bebop
 import random
 import time
 from enums import SH_ORIGINAL, SH_TIMESTAMP, RANDOM
+from algoritmo_aster import Pathfinder
 
 
 class drone:
@@ -66,8 +67,10 @@ class drone:
             rotation_diff = utils.angleDifference(self.current_position, new_position, self.current_rotation)
             distance_diff = utils.cartesianDistance(self.current_position, new_position)
             self.bebop.move_relative(0, 0, 0, rotation_diff)
+            time.sleep(2)
             self.bebop.move_relative(distance_diff, 0, verticalMove, 0)
-            self.bebop.current_rotation += rotation_diff
+            self.current_rotation -= rotation_diff
+            time.sleep(2)
         else:
             dx, dy = new_position[0] - self.current_position[0], new_position[1] - self.current_position[1]
             real_dx, real_dy = dx * self.rango_ancho, dy * self.rango_largo
@@ -245,7 +248,11 @@ class drone:
             return NORMAL
 
     def goHome(self):
-        self.move(self.home)
+        pathfinder = Pathfinder(self.current_position, self.home)
+        pathToFollow = pathfinder.findPath()
+        pathfinder.printFinalMap()
+        for nextPosition in pathfinder.parsePathToCoordinates(pathToFollow):
+            self.move(nextPosition)
 
     def getClosestCoordinateToTarget(self, target, pos):
         res = self.current_position[pos]
@@ -256,9 +263,8 @@ class drone:
         return res
 
     def moveToPoiCritico(self, path):
-        for i in range(len(path)):
-            nextPosition = path[i]
-            self.moveNextPositionPOICritico(nextPosition)
+        for nextPosition in path:
+            self.move(nextPosition)
 
     def moveNextPositionPOICritico(self, new_position):
         dx, dy = new_position[0] - self.current_position[0], new_position[1] - self.current_position[1]
