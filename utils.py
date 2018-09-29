@@ -24,6 +24,17 @@ def convertTupleToString(tupla):
         cnt += 1
     return result
 
+def convertTupleToStringParenthesis(tupla):
+    result = "("
+    cnt = 0
+    for i in tupla:
+        result += str(i)
+        if (cnt != len(tupla) - 1):
+            result += ","
+        cnt += 1
+    result += ")"
+    return result
+
 
 def convertStringToTuple(message):
     tupla = []
@@ -31,6 +42,23 @@ def convertStringToTuple(message):
         tupla.append(int(i))
     return tuple(tupla)
 
+def convertTupleListToString(list1):
+    strResult = '['
+    for idx, tupla in enumerate(list1):
+        strResult += convertTupleToStringParenthesis(tupla)
+        if(idx != len(list1) - 1):
+            strResult += ','
+    strResult += ']'
+    return strResult
+
+def convertListToString(list1):
+    strResult = '['
+    for idx, elem in enumerate(list1):
+        strResult += str(elem)
+        if(idx != len(list1) - 1):
+            strResult += ','
+    strResult += ']'
+    return strResult
 
 def cartesianDistance(tuple1, tuple2):
     return math.sqrt((tuple2[1] - tuple1[1])**2 + (tuple2[0] - tuple1[0])**2)
