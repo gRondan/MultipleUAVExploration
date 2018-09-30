@@ -65,10 +65,10 @@ def plotMatrix(drone1):
 
 drone1 = drone.drone(HOME)
 drone1.bebop.connect(10)
-logStats = stats.stats(drone1, 1)
+logStats = stats.stats(drone1, 3)
 connection = threading.Thread(
     target=main,
-    args=(drone1, logStats)
+    args=(drone1, logStats,)
 )
 connection2 = threading.Thread(
     target=interface,
