@@ -72,7 +72,7 @@ class stateMachine():
                 # desplazarseState.execute()
                 # currentState = desplazarseState.getNextState()
             elif self.currentState == ACTUALIZAR_MAPA:
-                self.state = actualizarMapa.actualizarMapa(self.bebop, self.dataBuffer, self.previousState, self.poisVigilar, self.poiVigilarTimeout, self.poiVigilarTimeoutDict, self.poisCritico, self.logStats, self.messages[self.currentState])
+                self.state = actualizarMapa.actualizarMapa(self.bebop, self.dataBuffer, self.previousState, self.poisVigilar, self.poiVigilarTimeout, self.poiVigilarTimeoutDict, self.poisCritico, self.assignedPOIs, self.logStats, self.messages[self.currentState])
 
                 # currentState = actualizarMapaState.getNextState()
             elif self.currentState == ENVIAR_MENSAJES:
@@ -88,7 +88,7 @@ class stateMachine():
 
                 # currentState = POICriticoState.getNextState()
             elif self.currentState == CHEQUEAR_STATUS_MISION:
-                self.state = chequearStatusMision.chequearStatusMision(self.bebop, self.dataBuffer, self.previousState, self.client, self.checkMissionStatus, self.poisVigilar, self.assignedPOIs, self.messages[self.currentState])
+                self.state = chequearStatusMision.chequearStatusMision(self.bebop, self.dataBuffer, self.previousState, self.client, self.checkMissionStatus, self.poisVigilar, self.assignedPOIs, self.poisCritico, self.messages[self.currentState])
                 # currentState = chequearStatusState.getNextState()
             elif self.currentState == ATERRIZAR:
                 self.state = aterrizar.aterrizar(self.bebop, self.dataBuffer, self.previousState, self.endMision, self.messages[self.currentState])
