@@ -14,7 +14,7 @@ if SPHINX_SIMULATION:
     import matplotlib.patches as patches
 
 
-def main(drone1, logStats, stateMachine1):
+def main(drone1, stateMachine1):
     # stateMachine1 = stateMachine(HOME, INIT_POI_POSITION, FOREVER_ALONE, drone1, OBSTACLES)
     server1 = server(drone1, stateMachine1)
     my_ip = server1.get_server_ip()
@@ -80,12 +80,12 @@ def plotMatrix(drone1, stateMachine1):
 
 
 drone1 = drone.drone(HOME)
-stateMachine1 = stateMachine(HOME, INIT_POI_POSITION, FOREVER_ALONE, drone1)
 drone1.bebop.connect(10)
 logStats = stats.stats(drone1, 3)
+stateMachine1 = stateMachine(HOME, INIT_POI_POSITION, FOREVER_ALONE, drone1, logStats)
 connection = threading.Thread(
     target=main,
-    args=(drone1,logStats,stateMachine1,)
+    args=(drone1, stateMachine1,)
 )
 connection2 = threading.Thread(
     target=interface,
@@ -98,6 +98,6 @@ connection2.start()
 if SPHINX_SIMULATION and ACTIVATE_GRAPHIC_MAP:
     connection3 = threading.Thread(
         target=plotMatrix,
-        args=(drone1,stateMachine1,)
+        args=(drone1, stateMachine1,)
     )
     connection3.start()
