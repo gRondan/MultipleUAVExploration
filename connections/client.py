@@ -107,7 +107,7 @@ class client:
             msj = json.dumps(msj_dict)
             ip = str(ip)
             hostalive = self.check_connection(ip)
-            if hostalive == 0:
+            if hostalive == 0 and not SPHINX_SIMULATION:
                 self.client_request(ip, port, msj)
             else:
                 print(ip, 'no se encontro el dron')
