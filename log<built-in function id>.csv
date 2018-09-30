@@ -1,5 +1,0 @@
-ID,PoiVigilar cantidad pois activados,PoiCritico cantidad pois activados,PoiVigilar cantidad pois atendidos,PoiCritico cantidad pois atendidos,PoiVigilar tiempoRespuesta promedio,PoiCritico tiempoRespuesta promedio,PoiVigilar tiempoRespuesta peor caso,PoiCritico tiempoRespuesta peor caso,PoiVigilar tiempoRespuesta mejor caso,PoiCritico tiempoRespuesta mejor caso
-1,2,1,1,1,54.31464385986328,34.31456756591797,54.31464385986328,34.31456756591797,54.31464385986328,34.31456756591797
-ID,Poi position,Poi Type,Poi tiempos
-1,|2,5|,Vigilar,54.31464385986328
-1,|2,5|,Critico,34.31456756591797
