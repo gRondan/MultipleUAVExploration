@@ -6,3 +6,5 @@ venv3/
 venv4/
 properties.py
 env-proyecto
+*.csv
+*.txt
