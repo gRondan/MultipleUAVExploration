@@ -82,7 +82,7 @@ def plotMatrix(drone1, stateMachine1):
 drone1 = drone.drone(HOME)
 stateMachine1 = stateMachine(HOME, INIT_POI_POSITION, FOREVER_ALONE, drone1)
 drone1.bebop.connect(10)
-logStats = stats.stats(drone1, 1)
+logStats = stats.stats(drone1, 3)
 connection = threading.Thread(
     target=main,
     args=(drone1,logStats,stateMachine1,)
