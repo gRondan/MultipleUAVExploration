@@ -16,7 +16,7 @@ from threading import Timer, Lock
 
 
 class stateMachine():
-    def __init__(self, home, initPoiPosition, isAlone, bebop):
+    def __init__(self, home, initPoiPosition, isAlone, bebop, logStats):
         self.initPoiPosition = initPoiPosition
         self.home = home
         self.dataBuffer = home
@@ -35,6 +35,7 @@ class stateMachine():
         self.poisVigilar = []
         self.isAlone = isAlone
         self.poiVigilarTimeoutDict = {}
+        self.logStats = logStats
 
     def execute(self):
         endExecutionTimer = Timer(TIMEOUT, self.isEndMision)
@@ -71,7 +72,7 @@ class stateMachine():
                 # desplazarseState.execute()
                 # currentState = desplazarseState.getNextState()
             elif self.currentState == ACTUALIZAR_MAPA:
-                self.state = actualizarMapa.actualizarMapa(self.bebop, self.dataBuffer, self.previousState, self.poisVigilar, self.poiVigilarTimeout, self.poiVigilarTimeoutDict, self.poisCritico, self.messages[self.currentState])
+                self.state = actualizarMapa.actualizarMapa(self.bebop, self.dataBuffer, self.previousState, self.poisVigilar, self.poiVigilarTimeout, self.poiVigilarTimeoutDict, self.poisCritico, self.logStats, self.messages[self.currentState])
 
                 # currentState = actualizarMapaState.getNextState()
             elif self.currentState == ENVIAR_MENSAJES:
@@ -114,7 +115,7 @@ class stateMachine():
                 self.state = desplazarseSinConexion.desplazarseSinConexion(self.bebop, self.dataBuffer, self.previousState, self.messages[self.currentState])
 
             elif self.currentState == FIN:
-                self.state = fin.fin(self.bebop, self.dataBuffer, self.previousState, self.client, self.messages[self.currentState])
+                self.state = fin.fin(self.bebop, self.dataBuffer, self.previousState, self.client, self.logStats, self.messages[self.currentState])
                 self.end = True
 
             self.processState()
@@ -172,6 +173,7 @@ class stateMachine():
         self.poisVigilar.append(poi)
         poiCriticoTimer = Timer(POI_CRITICO_TIMERS[POI_POSITIONS.index(poi)], self.poiCriticoTimeout, (poi,))
         poiCriticoTimer.start()
+        self.logStats.poiVigilarTimeout(poi)
 
     def poiCriticoTimeout(self, poi):
         encontre = False
@@ -180,3 +182,4 @@ class stateMachine():
             self.poisVigilar.remove(poi)
         if encontre or poi == self.bebop.poi_position:
             self.poisCritico.append(poi)
+            self.logStats.poiCriticoTimeout(poi)

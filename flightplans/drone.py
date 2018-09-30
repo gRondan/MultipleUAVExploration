@@ -26,6 +26,7 @@ class drone:
         self.poi_position = None
         self.home = home
         self.bebop = Bebop()
+        self.init_time = None
         self.obstaculos = properties.OBSTACLES
         self.max_altitude = properties.MAX_ALTITUDE
 
@@ -35,6 +36,7 @@ class drone:
             self.search_map[self.home[0]][self.home[1]] = 1
         elif properties.ALGORITHM == SH_TIMESTAMP:
             init_time = time.time()
+            self.init_time = init_time
             self.search_map = [[init_time for j in range(int(self.mapa_largo))]for i in range(int(self.mapa_ancho))]
         elif properties.ALGORITHM == RANDOM:
             self.search_map[self.home[0]][self.home[1]] = 1
@@ -212,6 +214,11 @@ class drone:
             self.search_map[tupla[0]][tupla[1]] += 1
         self.mutex_search_map.release()
 
+    def getSearchMap(self):
+        # self.mutex_search_map.acquire()
+        return [[self.search_map[i][j] for j in range(int(self.mapa_largo))]for i in range(int(self.mapa_ancho))]
+        # self.mutex_search_map.release()
+
     def getDroneAltitude(self):
         print("altura", self.bebop.sensors.sensors_dict["AltitudeChanged_altitude"])
         return self.bebop.sensors.sensors_dict["AltitudeChanged_altitude"]
@@ -289,8 +296,3 @@ class drone:
         print("-- Stopping Streaming... --")
         self.bebop.stop_video_stream()
         print("-- Streaming stopped!")
-
-
-
-
-

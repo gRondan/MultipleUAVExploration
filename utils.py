@@ -6,12 +6,16 @@ ipPortSplitter = ":"
 
 def printMatrix(matrix):
     print('****** PRINT MAPA ******')
+    print(getStringMatrix(matrix))
+    print('************************')
+
+
+def getStringMatrix(matrix):
     s = [[str(e) for e in row] for row in matrix]
     lens = [max(map(len, col)) for col in zip(*s)]
     fmt = '-'.join('{{:{}}}'.format(x) for x in lens)
     table = [fmt.format(*row) for row in s]
-    print('\n'.join(table))
-    print('************************')
+    return ('\n'.join(table))
 
 
 def convertTupleToString(tupla):
@@ -23,6 +27,7 @@ def convertTupleToString(tupla):
             result += ","
         cnt += 1
     return result
+
 
 def convertTupleToStringParenthesis(tupla):
     result = "("
@@ -42,6 +47,7 @@ def convertStringToTuple(message):
         tupla.append(int(i))
     return tuple(tupla)
 
+
 def convertTupleListToString(list1):
     strResult = '['
     for idx, tupla in enumerate(list1):
@@ -51,6 +57,7 @@ def convertTupleListToString(list1):
     strResult += ']'
     return strResult
 
+
 def convertListToString(list1):
     strResult = '['
     for idx, elem in enumerate(list1):
@@ -59,6 +66,7 @@ def convertListToString(list1):
             strResult += ','
     strResult += ']'
     return strResult
+
 
 def cartesianDistance(tuple1, tuple2):
     return math.sqrt((tuple2[1] - tuple1[1])**2 + (tuple2[0] - tuple1[0])**2)
