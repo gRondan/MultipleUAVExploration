@@ -4,6 +4,7 @@ from connections.server import server
 from properties import POI_POSITIONS, HOME, INIT_POI_POSITION, FOREVER_ALONE, OBSTACLES, SPHINX_SIMULATION, ALGORITHM, ACTIVATE_GRAPHIC_MAP
 from stateMachine.stateMachine import stateMachine
 from enums import RANDOM, SH_ORIGINAL, SH_TIMESTAMP
+from executionStats import stats
 
 if SPHINX_SIMULATION:
     import matplotlib
@@ -13,7 +14,7 @@ if SPHINX_SIMULATION:
     import matplotlib.patches as patches
 
 
-def main(drone1, stateMachine1):
+def main(drone1, logStats, stateMachine1):
     # stateMachine1 = stateMachine(HOME, INIT_POI_POSITION, FOREVER_ALONE, drone1, OBSTACLES)
     server1 = server(drone1, stateMachine1)
     my_ip = server1.get_server_ip()
@@ -81,9 +82,10 @@ def plotMatrix(drone1, stateMachine1):
 drone1 = drone.drone(HOME)
 stateMachine1 = stateMachine(HOME, INIT_POI_POSITION, FOREVER_ALONE, drone1)
 drone1.bebop.connect(10)
+logStats = stats.stats(drone1, 1)
 connection = threading.Thread(
     target=main,
-    args=(drone1,stateMachine1,)
+    args=(drone1,logStats,stateMachine1,)
 )
 connection2 = threading.Thread(
     target=interface,
