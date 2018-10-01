@@ -47,6 +47,7 @@ class server:
             client_socket.close()
             received_message_str = request.decode("utf-8")
             received_message = json.loads(received_message_str)
+            print(received_message)
             if(received_message["state"] == FIN):
                 self.mutex.acquire()
                 self.endServer = True
@@ -64,3 +65,4 @@ class server:
             self.mutex.acquire()
             end = self.endServer
             self.mutex.release()
+        print('TERMINO SERVER')

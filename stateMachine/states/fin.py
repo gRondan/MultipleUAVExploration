@@ -12,7 +12,7 @@ class fin():
 
     def execute(self):
         self.bebop.disconnect()
-        self.client.send_direct_message(createMessage(FIN, END_MISSION, "end"), self.bebop.ip)
+        self.client.send_direct_message(createMessage(FIN, END_MISSION, "end"), self.bebop.ip, self.bebop.port)
         self.logStats.endExecution()
         return None
 

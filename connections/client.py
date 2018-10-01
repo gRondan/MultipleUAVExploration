@@ -88,7 +88,10 @@ class client:
                 ip = str(ip)
                 hostalive = self.check_connection(ip)
                 if hostalive == 0:
-                    self.client_request(ip, port, msj)
+                    try:
+                        self.client_request(ip, port, msj)
+                    except ConnectionRefusedError as err:
+                        print("ConnectionRefusedError error: {0}".format(err))
                 else:
                     print(ip, 'no se encontro el dron')
                     handler = threading.Thread(
@@ -107,8 +110,11 @@ class client:
             msj = json.dumps(msj_dict)
             ip = str(ip)
             hostalive = self.check_connection(ip)
-            if hostalive == 0 and not SPHINX_SIMULATION:
-                self.client_request(ip, port, msj)
+            if hostalive == 0:
+                try:
+                    self.client_request(ip, port, msj)
+                except ConnectionRefusedError as err:
+                    print("ConnectionRefusedError error: {0}".format(err))
             else:
                 print(ip, 'no se encontro el dron')
                 handler = threading.Thread(
