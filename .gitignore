@@ -1,10 +1,20 @@
+# compiled files
 __pycache__/
 *.py[cod]
+
+# virtual environments
 venv/
 venv2/
 venv3/
 venv4/
-properties.py
+prueba/
 env-proyecto
+
+# base properties
+baseProperties.py
+
+# types of files with data
 *.csv
 *.txt
+*.drone
+*.world

@@ -1,7 +1,7 @@
 from flightplans import drone
 import threading
 from connections.server import server
-from properties import POI_POSITIONS, HOME, INIT_POI_POSITION, FOREVER_ALONE, OBSTACLES, SPHINX_SIMULATION, ALGORITHM, ACTIVATE_GRAPHIC_MAP
+from properties import SUPER_MAIN, POI_POSITIONS, HOME, INIT_POI_POSITION, FOREVER_ALONE, OBSTACLES, SPHINX_SIMULATION, ALGORITHM, ACTIVATE_GRAPHIC_MAP
 from stateMachine.stateMachine import stateMachine
 from enums import RANDOM, SH_ORIGINAL, SH_TIMESTAMP
 from executionStats import stats
@@ -26,7 +26,8 @@ def main(drone1, stateMachine1):
     )
     client_handler.start()
     stateMachine1.execute()
-
+    with open('pid.txt', 'w') as f:
+        f.write('')
 
 def interface(drone1):
     command = input("prompt")
@@ -61,7 +62,11 @@ def plotMatrix(drone1, stateMachine1):
             if( (i,j) in OBSTACLES ):
                 obstacle_matrix[i][j] = vmax
 
-    while True:
+    content = ''
+    with open('pid.txt', 'r') as f:
+        content = f.read()
+
+    while content != '':
         display_matrix = drone1.search_map
         if ALGORITHM == SH_TIMESTAMP:
             display_matrix = [[-(time.time() - drone1.search_map[i][j]) for j in range(int(drone1.mapa_largo))]for i in range(int(drone1.mapa_ancho))]
@@ -76,28 +81,38 @@ def plotMatrix(drone1, stateMachine1):
             plt.text(tupla[0], tupla[1], str(idx), color=color)
         plt.draw()
         plt.pause(0.001)
-        time.sleep(2)
+        time.sleep(1)
+        with open('pid.txt', 'r') as f:
+            content = f.read()
 
+def run():
+    with open('pid.txt', 'w') as f:
+        f.write('NO TERMINE')
+    drone1 = drone.drone(HOME)
+    drone1.bebop.connect(10)
+    logStats = stats.stats(drone1, 1)
+    stateMachine1 = stateMachine(HOME, INIT_POI_POSITION, FOREVER_ALONE, drone1, logStats)
 
-drone1 = drone.drone(HOME)
-drone1.bebop.connect(10)
-logStats = stats.stats(drone1, 3)
-stateMachine1 = stateMachine(HOME, INIT_POI_POSITION, FOREVER_ALONE, drone1, logStats)
-connection = threading.Thread(
-    target=main,
-    args=(drone1, stateMachine1,)
-)
-connection2 = threading.Thread(
-    target=interface,
-    args=(drone1,)
-)
-
-connection.start()
-connection2.start()
-
-if SPHINX_SIMULATION and ACTIVATE_GRAPHIC_MAP:
-    connection3 = threading.Thread(
-        target=plotMatrix,
-        args=(drone1, stateMachine1,)
+    connection = threading.Thread(
+        target=main,
+        args=(drone1,stateMachine1,)
     )
-    connection3.start()
+
+    if not SUPER_MAIN:
+        connection2 = threading.Thread(
+            target=interface,
+            args=(drone1,)
+        )
+        connection2.start()
+
+    connection.start()
+
+    if SPHINX_SIMULATION and ACTIVATE_GRAPHIC_MAP:
+        connection3 = threading.Thread(
+            target=plotMatrix,
+            args=(drone1,stateMachine1,)
+        )
+        connection3.start()
+
+if __name__ == "__main__":
+    run()

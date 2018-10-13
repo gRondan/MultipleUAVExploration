@@ -17,8 +17,8 @@ with open('baseProperties.py', 'r') as properties:
 
 for it in range(INSTANCE_NUMBER):
     # generar tamaño mapa
-    cantLargo = randint(5, 30)
-    cantAncho = randint(5, 30)
+    cantLargo = randint(8, 12)
+    cantAncho = randint(8, 12)
     largo = cantLargo * SQUARE_SIZE
     ancho = cantAncho * SQUARE_SIZE
     new_content = re.sub(r'MAPA_LARGO.*', 'MAPA_LARGO=' + str(largo), content)
@@ -34,7 +34,7 @@ for it in range(INSTANCE_NUMBER):
     # con obstaculos aleatorios
     elif(it % 3 == 1):
         cantObstaculos = randint(int(cantLargo*cantAncho*0.1), int(cantLargo*cantAncho*0.3))
-        positions = [(i,j) for i, j in product(range(cantLargo), range(cantAncho))]
+        positions = [(i,j) for i, j in product(range(cantAncho), range(cantLargo))]
         result = sample(positions, cantObstaculos)
     # con obstaculos en forma de pared
     elif(it % 3 == 2):
@@ -62,7 +62,7 @@ for it in range(INSTANCE_NUMBER):
 
     # pois
     cantPois = randint(0, int(cantLargo*cantAncho*0.05))
-    positions = [(i,j) for i, j in product(range(cantLargo), range(cantAncho)) if (i,j) not in result]
+    positions = [(i,j) for i, j in product(range(cantAncho), range(cantLargo)) if (i,j) not in result]
     poiResult = sample(positions, cantPois)
     poiTimers = []
     poiCriticalTimers = []

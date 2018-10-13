@@ -36,6 +36,7 @@ class server:
 
     def run_server(self):
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server.settimeout(10)
         server.bind((self.ip, self.port))
         server.listen(5)  # max backlog of connections
         addr = server.getsockname()
@@ -47,6 +48,7 @@ class server:
             client_socket.close()
             received_message_str = request.decode("utf-8")
             received_message = json.loads(received_message_str)
+            print(received_message)
             if(received_message["state"] == FIN):
                 self.mutex.acquire()
                 self.endServer = True
@@ -55,12 +57,17 @@ class server:
                 stateMachine.handleMessage(received_message)
 
         while not end:
-            client_sock, address = server.accept()
-            client_handler = threading.Thread(
-                target=handle_client_connection,
-                args=(self, client_sock, drone, self.stateMachine,)
-            )
-            client_handler.start()
+            try:
+                client_sock, address = server.accept()
+                client_handler = threading.Thread(
+                    target=handle_client_connection,
+                    args=(self, client_sock, drone, self.stateMachine,)
+                )
+                client_handler.start()
+            except:
+                pass
             self.mutex.acquire()
             end = self.endServer
             self.mutex.release()
+
+        server.close()
