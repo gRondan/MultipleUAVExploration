@@ -62,7 +62,11 @@ def plotMatrix(drone1, stateMachine1):
             if( (i,j) in OBSTACLES ):
                 obstacle_matrix[i][j] = vmax
 
-    while True:
+    content = ''
+    with open('pid.txt', 'r') as f:
+        content = f.read()
+
+    while content != '':
         display_matrix = drone1.search_map
         if ALGORITHM == SH_TIMESTAMP:
             display_matrix = [[-(time.time() - drone1.search_map[i][j]) for j in range(int(drone1.mapa_largo))]for i in range(int(drone1.mapa_ancho))]
@@ -77,7 +81,9 @@ def plotMatrix(drone1, stateMachine1):
             plt.text(tupla[0], tupla[1], str(idx), color=color)
         plt.draw()
         plt.pause(0.001)
-        time.sleep(2)
+        time.sleep(1)
+        with open('pid.txt', 'r') as f:
+            content = f.read()
 
 def run():
     with open('pid.txt', 'w') as f:
@@ -101,7 +107,7 @@ def run():
 
     connection.start()
 
-    if SPHINX_SIMULATION and ACTIVATE_GRAPHIC_MAP and not SUPER_MAIN:
+    if SPHINX_SIMULATION and ACTIVATE_GRAPHIC_MAP:
         connection3 = threading.Thread(
             target=plotMatrix,
             args=(drone1,stateMachine1,)

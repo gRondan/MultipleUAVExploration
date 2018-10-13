@@ -91,7 +91,7 @@ class client:
                     try:
                         self.client_request(ip, port, msj)
                     except ConnectionRefusedError as err:
-                        print("ConnectionRefusedError error: {0}".format(err))
+                        print("ConnectionRefusedError error: Unable to send message to {}".format(ip))
                 else:
                     print(ip, 'no se encontro el dron')
                     handler = threading.Thread(
@@ -114,7 +114,7 @@ class client:
                 try:
                     self.client_request(ip, port, msj)
                 except ConnectionRefusedError as err:
-                    print("ConnectionRefusedError error: {0}".format(err))
+                    print("ConnectionRefusedError error: Unable to send message to {}:{}".format(ip, port))
             else:
                 print(ip, 'no se encontro el dron')
                 handler = threading.Thread(

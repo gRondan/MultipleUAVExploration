@@ -17,8 +17,8 @@ with open('baseProperties.py', 'r') as properties:
 
 for it in range(INSTANCE_NUMBER):
     # generar tamaño mapa
-    cantLargo = randint(5, 20)
-    cantAncho = randint(5, 20)
+    cantLargo = randint(8, 12)
+    cantAncho = randint(8, 12)
     largo = cantLargo * SQUARE_SIZE
     ancho = cantAncho * SQUARE_SIZE
     new_content = re.sub(r'MAPA_LARGO.*', 'MAPA_LARGO=' + str(largo), content)
