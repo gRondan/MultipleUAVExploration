@@ -1,5 +1,5 @@
 import math
-
+from properties import OBSTACLES
 # CONSTANTS
 ipPortSplitter = ":"
 
@@ -123,3 +123,18 @@ def concatIpPort(ip, port):
 
 def parseIpPort(ipPort):
     return dict({"ip": ipPort.split(ipPortSplitter)[0], "port": ipPort.split(ipPortSplitter)[1]})
+
+
+def getMapCoverage(drone, init_largo, end_largo, init_ancho, end_ancho):
+    totalMap = (end_largo - init_largo) * (end_ancho - init_ancho)
+    isTimer = drone.init_time is not None
+    totalMap -= len(OBSTACLES)
+    contSinExplorar = 0
+    for i in range(int(init_ancho), int(end_ancho)):
+        for j in range(int(init_largo), int(end_largo)):
+            if isTimer:
+                if drone.search_map[i][j] != drone.init_time:
+                    contSinExplorar += 1
+            elif drone.search_map[i][j] > drone.countIter:
+                contSinExplorar += 1
+    return (contSinExplorar * 100) // totalMap

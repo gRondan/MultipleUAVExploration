@@ -37,7 +37,6 @@ class client:
     def check_friends(self):
         cont = []
         currentPosition = 0
-        print("check_friends")
         for ip in self.friends:
             print("ip: ", ip)
             status = self.check_connection(ip)
