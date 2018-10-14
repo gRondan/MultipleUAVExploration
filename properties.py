@@ -1,6 +1,13 @@
 import sys
 from importlib import import_module
-if(len(sys.argv) > 1):
+
+valor = ''
+try:
+    valor = int(sys.argv[1])
+except:
+    pass
+
+if valor:
     props = import_module('testCases.properties' + sys.argv[1])
     for i in dir(props):
         globals()[i] = getattr(props, i)
