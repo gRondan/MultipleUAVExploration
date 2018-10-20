@@ -55,9 +55,7 @@ class drone:
             self.initializeStreaming()
 
     def initSearchMapWithObstacles(self):
-        print('obstaculos: ', self.obstaculos)
         for obstacle in self.obstaculos:
-            print('obstacle: ', obstacle)
             self.search_map[obstacle[0]][obstacle[1]] = -1
 
     def take_off(self):
@@ -67,8 +65,6 @@ class drone:
         self.bebop.safe_land(10)
 
     def move(self, new_position):
-        print("new position: ", new_position)
-        print("current_position: ", self.current_position)
         verticalMove = self.getDronVerticalAlignment()
         if properties.ROTATE:
             rotation_diff = utils.angleDifference(self.current_position, new_position, self.current_rotation)
@@ -126,7 +122,6 @@ class drone:
                         val = self.search_map[x3][y3]
                     self.mutex_search_map.release()
         selected = self.selectBestValue(best_values)
-        print("x: " + str(selected[0]) + " y: " + str(selected[1]))
         return selected
 
     def explore_sh_timestamp(self, forcePosition):
@@ -153,7 +148,6 @@ class drone:
                         val = self.search_map[x3][y3]
                     self.mutex_search_map.release()
         selected = self.selectBestValue(best_values)
-        print("x: " + str(selected[0]) + " y: " + str(selected[1]))
         return selected
 
     def explore_random(self, forcePosition):
@@ -167,7 +161,6 @@ class drone:
                 if self.validatePosition(x3, y3, forcePosition):
                     best_values.append((x3, y3))
         selected = self.selectBestValue(best_values)
-        print("x: " + str(selected[0]) + " y: " + str(selected[1]))
         return selected
 
 # primer intento de algoritmo no greedy, si se lo trabaja un poco puede funcionar
@@ -197,9 +190,7 @@ class drone:
                             best_values = [(x3, y3)]
                             val = self.search_map[x3][y3]
                     self.mutex_search_map.release()
-        print("BEST VALUES: ", best_values)
         selected = self.selectBestValue(best_values)
-        print("x: " + str(selected[0]) + " y: " + str(selected[1]))
         return selected
 
     def explore_sh_no_greedy2(self, forcePosition):
@@ -208,7 +199,6 @@ class drone:
         else:
             newZone = self.isChangeZone()
             if newZone is not None:
-                print("NEW ZONE: ", newZone)
                 self.destinationZone = newZone
                 self.getZonePath(newZone)
                 # self.selectNewZone(newZone)
@@ -225,7 +215,6 @@ class drone:
         else:
             newZone = self.isChangeZone()
             if newZone is not None:
-                print("NEW ZONE: ", newZone)
                 self.destinationZone = newZone
                 self.getZonePath(newZone)
                 # self.selectNewZone(newZone)
@@ -236,16 +225,13 @@ class drone:
     def getNewPositionFromPath(self):
         new_position = self.pathToFollow[0]
         del self.pathToFollow[0]
-        print("self.getPositionZone(new_position): ", self.getPositionZone(new_position), " self.destinationZone: ", self.destinationZone, " self.search_map[new_position[0], new_position[1]]: ", self.search_map[new_position[0]][new_position[1]])
         if self.getPositionZone(new_position) == self.destinationZone and self.isUnexploredPosition(new_position):
-            print('END NEW ZONE')
             self.pathToFollow = None
             self.destinationZone = None
         return new_position
 
     def isUnexploredPosition(self, new_position):
         if ALGORITHM == SH_NO_GREEDY_TIMESTAMP or ALGORITHM == SH_TIMESTAMP:
-            print("new_position: ",new_position)
             timeBetweenLastVisit = time.time() - self.search_map[new_position[0]][new_position[1]]
             firstTime = self.search_map[new_position[0]][new_position[1]] == self.init_time
             return timeBetweenLastVisit > TIME_COVERAGE_REFRESH or firstTime
@@ -257,7 +243,6 @@ class drone:
         zonesCoverage = self.getZonesCoverage()
         currentZoneCoverage = zonesCoverage[currentZone - 1]
         minZoneCoverage = min(zonesCoverage)
-        print("currentZone: ",currentZone," currentZoneCoverage: ",currentZoneCoverage," minZoneCoverage: ",minZoneCoverage, " zonesCoverage: ",zonesCoverage)
         if minZoneCoverage >= MIN_ACCEPTABLE_COVERAGE:
             self.countIter += 1
             # self.updateCoverageCondition()
@@ -277,7 +262,6 @@ class drone:
 
     def getZonePath(self, newZone):
         zonePosition = self.selectPositionInZone(newZone)
-        print("self.current_position: ", self.current_position, " zonePosition: ", zonePosition)
         pathfinder = Pathfinder(self.current_position, zonePosition)
         pathToFollow = pathfinder.findPath()
         self.pathToFollow = pathfinder.parsePathToCoordinates(pathToFollow)
@@ -345,11 +329,9 @@ class drone:
                 return [(-1, -1), (0, -1), (1, -1)]
 
     def getCurrentRegion(self):
-        print("getCurrentRegion")
         return self.getPositionZone(self.current_position)
 
     def getPositionZone(self, position):
-        print("position: ",position," self.mapa_largo: ",self.mapa_largo, " self .mapa_ancho: ", self .mapa_ancho)
         if self.mapa_largo / 2 > position[1] and self .mapa_ancho / 2 > position[0]:
             return 1
         elif self.mapa_largo / 2 <= position[1] and self .mapa_ancho / 2 > position[0]:
@@ -431,7 +413,6 @@ class drone:
         # self.mutex_search_map.release()
 
     def getDroneAltitude(self):
-        print("altura", self.bebop.sensors.sensors_dict["AltitudeChanged_altitude"])
         return self.bebop.sensors.sensors_dict["AltitudeChanged_altitude"]
 
     def checkDroneAltitudeStatus(self):

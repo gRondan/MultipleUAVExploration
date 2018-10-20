@@ -24,7 +24,6 @@ class actualizarMapa():
     def execute(self):
         current_position = self.bebop.current_position
         nextState = self.dataBuffer
-        print("ACTUALIZAR_MAPA", " self.bebop.poi_position ", self.bebop.poi_position, " current_position ", current_position)
         if (self.bebop.poi_position == current_position):
             self.bebop.poi_position = None
             poiKey = convertTupleToString(current_position)
@@ -32,7 +31,6 @@ class actualizarMapa():
                 executionTimer = self.poiVigilarTimeoutDict[poiKey]
                 executionTimer.cancel()
                 executionTimerNew = Timer(POI_TIMERS[POI_POSITIONS.index(current_position)], self.poiVigilarTimeout, (current_position, ))
-                print("##########ACTUALIZATIMER########")
                 executionTimerNew.start()
                 self.poiVigilarTimeoutDict[poiKey] = executionTimerNew
                 self.logStats.poiExplorado(poiKey)

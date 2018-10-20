@@ -7,9 +7,9 @@ ipPortSplitter = ":"
 
 
 def printMatrix(matrix):
-    print('****** PRINT MAPA ******')
-    print(getStringMatrix(matrix))
-    print('************************')
+    # print('****** PRINT MAPA ******')
+    # print(getStringMatrix(matrix))
+    # print('************************')
 
 
 def getStringMatrix(matrix):

@@ -157,8 +157,6 @@ class asignarPOI():
             timer2 = threading.Timer(TIME_BETWEEN_POI_PING, self.checkMissionStatus, (self.poi,))
             timer2.start()
             self.assignedPOIs[convertTupleToString(self.poi)] = concensus
-            print("drone Asignado: ", concensus)
-        print("POI ASignado: ", self.poi)
         return self.poi
 
     def messageWaitTimeout(self):

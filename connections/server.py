@@ -12,7 +12,6 @@ from stateMachine.statesEnum import FIN
 class server:
 
     def __init__(self, bebop, stateMachine):
-        print("####################init server################")
         self.bebop = bebop
         self.stateMachine = stateMachine
         self.endServer = False
@@ -21,7 +20,6 @@ class server:
         port = SPHINX_PORT
         if not SPHINX_SIMULATION:
             port = PORT
-        print("Server IP: ", ip, port)
         self.ip = ip
         self.port = port
 
@@ -48,7 +46,6 @@ class server:
             client_socket.close()
             received_message_str = request.decode("utf-8")
             received_message = json.loads(received_message_str)
-            print(received_message)
             if(received_message["state"] == FIN):
                 self.mutex.acquire()
                 self.endServer = True

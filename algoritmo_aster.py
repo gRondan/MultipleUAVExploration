@@ -1,9 +1,9 @@
 #
 #	Implementacion de algoritmo A*
-#	
-#	Se utiliza un funcion heuristica f(n) para evaluar y etiquetar los nodos de la red. Esta funcion 
+#
+#	Se utiliza un funcion heuristica f(n) para evaluar y etiquetar los nodos de la red. Esta funcion
 #	evaluara la probabilidad de un nodo de pertenecer al camino optimo.
-#	
+#
 #		f(n) = g(n) + h(n)
 
 #		g(n) = distancia actual desde el nodo origen al nodo n a etiquetar
@@ -34,45 +34,45 @@ class Pathfinder:
 
 
 	def printInitialMap(self):
-		print("**** MAPA INICIAL *****")
-		for x in range(int(self.mapa_ancho)):
-			linea = " "
-			for y in range(int(self.mapa_largo)):
-				if self.completeMap[x][y]["isObstacle"]:
-					linea = linea + "X "
-				elif self.init[0] == self.completeMap[x][y]["x"] and self.init[1] == self.completeMap[x][y]["y"]:
-					linea = linea + "I "
-				elif self.target[0] == self.completeMap[x][y]["x"] and self.target[1] == self.completeMap[x][y]["y"]:
-					linea = linea + "T "
-				else:
-					linea = linea + "0 "
-			print(linea)
-		print("************************")
+		# print("**** MAPA INICIAL *****")
+		# for x in range(int(self.mapa_ancho)):
+		# 	linea = " "
+		# 	for y in range(int(self.mapa_largo)):
+		# 		if self.completeMap[x][y]["isObstacle"]:
+		# 			linea = linea + "X "
+		# 		elif self.init[0] == self.completeMap[x][y]["x"] and self.init[1] == self.completeMap[x][y]["y"]:
+		# 			linea = linea + "I "
+		# 		elif self.target[0] == self.completeMap[x][y]["x"] and self.target[1] == self.completeMap[x][y]["y"]:
+		# 			linea = linea + "T "
+		# 		else:
+		# 			linea = linea + "0 "
+		# 	print(linea)
+		# print("************************")
 
 
 	def printFinalMap(self):
-		print("**** MAPA FINAL CON CAMINO *****")
-		puntosEncontrados = 0
-		for x in range(int(self.mapa_ancho)):
-			linea = " "
-			for y in range(int(self.mapa_largo)):
-				esParteDelPath = False
-				for z in range(len(self.pathResult)):
-					if self.pathResult[z]["x"] == x and self.pathResult[z]["y"] == y:
-						esParteDelPath = True
-						puntosEncontrados = puntosEncontrados + 1
-				if esParteDelPath:
-					linea = linea + str(puntosEncontrados) + " "
-				elif self.completeMap[x][y]["isObstacle"]:
-					linea = linea + "X "
-				elif self.init[0] == self.completeMap[x][y]["x"] and self.init[1] == self.completeMap[x][y]["y"]:
-					linea = linea + "I "
-				elif self.target[0] == self.completeMap[x][y]["x"] and self.target[1] == self.completeMap[x][y]["y"]:
-					linea = linea + "T "
-				else:
-					linea = linea + "0 "
-			print(linea)
-		print("************************")
+		# print("**** MAPA FINAL CON CAMINO *****")
+		# puntosEncontrados = 0
+		# for x in range(int(self.mapa_ancho)):
+		# 	linea = " "
+		# 	for y in range(int(self.mapa_largo)):
+		# 		esParteDelPath = False
+		# 		for z in range(len(self.pathResult)):
+		# 			if self.pathResult[z]["x"] == x and self.pathResult[z]["y"] == y:
+		# 				esParteDelPath = True
+		# 				puntosEncontrados = puntosEncontrados + 1
+		# 		if esParteDelPath:
+		# 			linea = linea + str(puntosEncontrados) + " "
+		# 		elif self.completeMap[x][y]["isObstacle"]:
+		# 			linea = linea + "X "
+		# 		elif self.init[0] == self.completeMap[x][y]["x"] and self.init[1] == self.completeMap[x][y]["y"]:
+		# 			linea = linea + "I "
+		# 		elif self.target[0] == self.completeMap[x][y]["x"] and self.target[1] == self.completeMap[x][y]["y"]:
+		# 			linea = linea + "T "
+		# 		else:
+		# 			linea = linea + "0 "
+		# 	print(linea)
+		# print("************************")
 
 
 	def initializeMap(self):
@@ -90,7 +90,7 @@ class Pathfinder:
 				}
 		self.obstaculos = properties.OBSTACLES
 		return completeMap
-    
+
 
 	def isObstacle(self, point, removeObstacle):
 		isObstacle = False
@@ -136,10 +136,10 @@ class Pathfinder:
 
 
 	def printNeighbours(self, node, neighbours):
-		vecinos = "==>Vecinos de (" + str(node["x"]) + "," + str(node["y"]) + "):  "
-		for i in range(len(neighbours)):
-			vecinos = vecinos + "(" + str(neighbours[i]["x"]) + "," + str(neighbours[i]["y"]) + ")"
-		print(vecinos)
+		# vecinos = "==>Vecinos de (" + str(node["x"]) + "," + str(node["y"]) + "):  "
+		# for i in range(len(neighbours)):
+		# 	vecinos = vecinos + "(" + str(neighbours[i]["x"]) + "," + str(neighbours[i]["y"]) + ")"
+		# print(vecinos)
 
 
 	def arrivedToTarget(self, point, target):
@@ -180,10 +180,10 @@ class Pathfinder:
 
 
 	def printResultPath(self, pathList):
-		caminoResultante = "==>Camino Resultante: "
-		for i in range(len(pathList)):
-			caminoResultante = caminoResultante + "(" + str(pathList[i]["x"]) + "," + str(pathList[i]["y"]) + ")"
-		print(caminoResultante)
+		# caminoResultante = "==>Camino Resultante: "
+		# for i in range(len(pathList)):
+		# 	caminoResultante = caminoResultante + "(" + str(pathList[i]["x"]) + "," + str(pathList[i]["y"]) + ")"
+		# print(caminoResultante)
 
 
 	def parsePathToCoordinates(self, pathList):
@@ -207,7 +207,7 @@ class Pathfinder:
 			# self.printNeighbours(node, neighbours)
 			j = 0
 			while (not end and j < len(neighbours)):
-				adyacent = self.completeMap[neighbours[j]["x"]][neighbours[j]["y"]] 
+				adyacent = self.completeMap[neighbours[j]["x"]][neighbours[j]["y"]]
 				if self.arrivedToTarget(adyacent, self.target):
 					end = True
 					self.completeMap[adyacent["x"]][adyacent["y"]]["dad"] = node

@@ -38,7 +38,6 @@ class client:
         cont = []
         currentPosition = 0
         for ip in self.friends:
-            print("ip: ", ip)
             status = self.check_connection(ip)
             if status == 0:
                 cont.append(dict({"ip": ip, "port": self.friendsPorts[currentPosition]}))
@@ -58,11 +57,8 @@ class client:
                     output = toping.communicate()[0]
                     hostalive = toping.returncode
                     if hostalive == 0:
-                        print(i, 'IS REACHABLE')
                         self.friends.append(i)
                         self.friendsPorts.append(PORT)
-                    else:
-                        print(i, 'is unreachable')
 
     def client_request(self, ip_address, port, msj):
         # try:
@@ -73,7 +69,6 @@ class client:
         client.connect((ip_address, port))
         client.send(str.encode(msj))
         response = client.recv(4096)
-        print(response)
         # except:
         #     pass
 
@@ -90,9 +85,8 @@ class client:
                     try:
                         self.client_request(ip, port, msj)
                     except ConnectionRefusedError as err:
-                        print("ConnectionRefusedError error: Unable to send message to {}".format(ip))
+                        pass
                 else:
-                    print(ip, 'no se encontro el dron')
                     handler = threading.Thread(
                         target=self.reconect,
                         args=(msj, ip, port,)
@@ -113,9 +107,8 @@ class client:
                 try:
                     self.client_request(ip, port, msj)
                 except ConnectionRefusedError as err:
-                    print("ConnectionRefusedError error: Unable to send message to {}:{}".format(ip, port))
+                    pass
             else:
-                print(ip, 'no se encontro el dron')
                 handler = threading.Thread(
                     target=self.reconect,
                     args=(msj, ip, port)
@@ -133,6 +126,5 @@ class client:
             time.sleep(5)
             hostalive = self.check_connection(ip)
             if hostalive == 0:
-                print(ip, 'reconexion exitosa')
                 self.client_request(ip, port, msj)
                 found = True

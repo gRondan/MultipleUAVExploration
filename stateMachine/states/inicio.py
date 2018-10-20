@@ -27,12 +27,10 @@ class inicio():
         timer.start()
         self.syncLock.acquire()
         client1.search_friends(self.bebop.ip)
-        print("execute de inicio")
         if not self.awoken:
             message = createMessage(INICIO, SYNC, 'wake up!')
             client1.send_message(message)
         for i in range(len(POI_POSITIONS)):
-            print("entra for ", POI_TIMERS[i], POI_POSITIONS[i])
             new_timer = Timer(POI_TIMERS[i], self.setTimerFunc, (POI_POSITIONS[i],))
             new_timer.start()
             self.poiVigilarTimeoutDict[convertTupleToString(POI_POSITIONS[i])] = new_timer
