@@ -1,5 +1,5 @@
 import properties
-from properties import COVERAGE_THRESHOLD, MIN_ACCEPTABLE_COVERAGE
+from properties import COVERAGE_THRESHOLD, MIN_ACCEPTABLE_COVERAGE, ALGORITHM, TIME_COVERAGE_REFRESH
 import utils
 from utils import getMapCoverage
 import math
@@ -9,7 +9,7 @@ import threading
 from pyparrot.Bebop import Bebop
 import random
 import time
-from enums import SH_ORIGINAL, SH_TIMESTAMP, RANDOM, SH_NO_GREEDY
+from enums import SH_ORIGINAL, SH_TIMESTAMP, RANDOM, SH_NO_GREEDY, SH_NO_GREEDY_TIMESTAMP
 from algoritmo_aster import Pathfinder
 
 
@@ -39,7 +39,7 @@ class drone:
         self.initSearchMapWithObstacles()
         if properties.ALGORITHM == SH_ORIGINAL:
             self.search_map[self.home[0]][self.home[1]] = 1
-        elif properties.ALGORITHM == SH_TIMESTAMP:
+        elif properties.ALGORITHM == SH_TIMESTAMP or ALGORITHM == SH_NO_GREEDY_TIMESTAMP:
             init_time = time.time()
             self.init_time = init_time
             self.search_map = [[init_time for j in range(int(self.mapa_largo))]for i in range(int(self.mapa_ancho))]
@@ -98,7 +98,7 @@ class drone:
             return self.explore_sh_timestamp(forcePosition)
         elif properties.ALGORITHM == RANDOM:
             return self.explore_random(forcePosition)
-        elif properties.ALGORITHM == SH_NO_GREEDY:
+        elif properties.ALGORITHM == SH_NO_GREEDY or properties.ALGORITHM == SH_NO_GREEDY_TIMESTAMP:
             return self.explore_sh_no_greedy2(forcePosition)
 
     def explore_sh_original(self, forcePosition):
@@ -152,7 +152,6 @@ class drone:
                         best_values = [(x3, y3)]
                         val = self.search_map[x3][y3]
                     self.mutex_search_map.release()
-        print("BEST VALUES: ", best_values)
         selected = self.selectBestValue(best_values)
         print("x: " + str(selected[0]) + " y: " + str(selected[1]))
         return selected
@@ -171,6 +170,7 @@ class drone:
         print("x: " + str(selected[0]) + " y: " + str(selected[1]))
         return selected
 
+# primer intento de algoritmo no greedy, si se lo trabaja un poco puede funcionar
     def explore_sh_no_greedy(self, forcePosition):
         firstTime = True
         x = self.current_position[0]
@@ -214,17 +214,43 @@ class drone:
                 # self.selectNewZone(newZone)
                 return self.getNewPositionFromPath()
             else:
-                return self.explore_sh_original(forcePosition)
+                if ALGORITHM == SH_NO_GREEDY:
+                    return self.explore_sh_original(forcePosition)
+                else:
+                    return self.explore_sh_timestamp(forcePosition)
+
+    def explore_sh_no_greedy_timestamp(self, forcePosition):
+        if self.pathToFollow is not None and len(self.pathToFollow) > 0:
+            return self.getNewPositionFromPath()
+        else:
+            newZone = self.isChangeZone()
+            if newZone is not None:
+                print("NEW ZONE: ", newZone)
+                self.destinationZone = newZone
+                self.getZonePath(newZone)
+                # self.selectNewZone(newZone)
+                return self.getNewPositionFromPath()
+            else:
+                return self.explore_sh_timestamp(forcePosition)
 
     def getNewPositionFromPath(self):
         new_position = self.pathToFollow[0]
         del self.pathToFollow[0]
         print("self.getPositionZone(new_position): ", self.getPositionZone(new_position), " self.destinationZone: ", self.destinationZone, " self.search_map[new_position[0], new_position[1]]: ", self.search_map[new_position[0]][new_position[1]])
-        if self.getPositionZone(new_position) == self.destinationZone and self.search_map[new_position[0]][new_position[1]] == 0:
+        if self.getPositionZone(new_position) == self.destinationZone and self.isUnexploredPosition(new_position):
             print('END NEW ZONE')
             self.pathToFollow = None
             self.destinationZone = None
         return new_position
+
+    def isUnexploredPosition(self, new_position):
+        if ALGORITHM == SH_NO_GREEDY_TIMESTAMP or ALGORITHM == SH_TIMESTAMP:
+            print("new_position: ",new_position)
+            timeBetweenLastVisit = time.time() - self.search_map[new_position[0]][new_position[1]]
+            firstTime = self.search_map[new_position[0]][new_position[1]] == self.init_time
+            return timeBetweenLastVisit > TIME_COVERAGE_REFRESH or firstTime
+        else:
+            return self.search_map[new_position[0]][new_position[1]] == self.countIter
 
     def isChangeZone(self):
         currentZone = self.getCurrentRegion()
@@ -234,6 +260,7 @@ class drone:
         print("currentZone: ",currentZone," currentZoneCoverage: ",currentZoneCoverage," minZoneCoverage: ",minZoneCoverage, " zonesCoverage: ",zonesCoverage)
         if minZoneCoverage >= MIN_ACCEPTABLE_COVERAGE:
             self.countIter += 1
+            # self.updateCoverageCondition()
             zonesCoverage = self.getZonesCoverage()
             currentZoneCoverage = zonesCoverage[currentZone - 1]
             minZoneCoverage = min(zonesCoverage)
@@ -241,6 +268,12 @@ class drone:
             newZone = self.selectUnexploredRegion()
             return newZone
         return None
+
+    def updateCoverageCondition(self):
+        if self.init_time is not None:
+            self.init_time = time.time()
+        else:
+            self.countIter += 1
 
     def getZonePath(self, newZone):
         zonePosition = self.selectPositionInZone(newZone)
@@ -268,12 +301,6 @@ class drone:
         return position
 
     def selectNewZone(self, currentZone):
-        newZone = random.randint(0, 3)
-        while newZone == currentZone:
-            newZone = random.randint(0, 3)
-        return newZone
-
-    def selectNewZone2(self, currentZone):
         newZone = random.randint(0, 3)
         while newZone == currentZone:
             newZone = random.randint(0, 3)
@@ -392,7 +419,7 @@ class drone:
         self.mutex_search_map.acquire()
         if properties.ALGORITHM == SH_ORIGINAL or properties.ALGORITHM == SH_NO_GREEDY:
             self.search_map[tupla[0]][tupla[1]] += 1
-        elif properties.ALGORITHM == SH_TIMESTAMP:
+        elif properties.ALGORITHM == SH_TIMESTAMP or ALGORITHM == SH_NO_GREEDY_TIMESTAMP:
             self.search_map[tupla[0]][tupla[1]] = time.time()
         elif properties.ALGORITHM == RANDOM:
             self.search_map[tupla[0]][tupla[1]] += 1

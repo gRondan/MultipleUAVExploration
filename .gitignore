@@ -11,7 +11,8 @@ prueba/
 env-proyecto
 segundo-dron/
 # base properties
-baseProperties.py
+# baseProperties.py
+properties.py
 
 # types of files with data
 *.csv
