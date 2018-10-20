@@ -1,5 +1,7 @@
 import math
-from properties import OBSTACLES
+import time
+from properties import OBSTACLES, TIME_COVERAGE_REFRESH, ALGORITHM
+from enums import SH_NO_GREEDY_TIMESTAMP, SH_TIMESTAMP
 # CONSTANTS
 ipPortSplitter = ":"
 
@@ -127,13 +129,17 @@ def parseIpPort(ipPort):
 
 def getMapCoverage(drone, init_largo, end_largo, init_ancho, end_ancho):
     totalMap = (end_largo - init_largo) * (end_ancho - init_ancho)
-    isTimer = drone.init_time is not None
+    isTimer = ALGORITHM == SH_TIMESTAMP or ALGORITHM == SH_NO_GREEDY_TIMESTAMP
     totalMap -= len(OBSTACLES)
     contSinExplorar = 0
+    currentTime = time.time()
     for i in range(int(init_ancho), int(end_ancho)):
         for j in range(int(init_largo), int(end_largo)):
             if isTimer:
-                if drone.search_map[i][j] != drone.init_time:
+                timeBetweenLastVisit = currentTime - drone.search_map[i][j]
+                firstTime = drone.search_map[i][j] == drone.init_time
+                # print("timeBetweenLastVisit: ", timeBetweenLastVisit)
+                if timeBetweenLastVisit < TIME_COVERAGE_REFRESH and not firstTime:
                     contSinExplorar += 1
             elif drone.search_map[i][j] > drone.countIter:
                 contSinExplorar += 1
