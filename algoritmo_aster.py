@@ -34,6 +34,7 @@ class Pathfinder:
 
 
 	def printInitialMap(self):
+		a =1
 		# print("**** MAPA INICIAL *****")
 		# for x in range(int(self.mapa_ancho)):
 		# 	linea = " "
@@ -51,6 +52,7 @@ class Pathfinder:
 
 
 	def printFinalMap(self):
+		a =1
 		# print("**** MAPA FINAL CON CAMINO *****")
 		# puntosEncontrados = 0
 		# for x in range(int(self.mapa_ancho)):
@@ -136,6 +138,7 @@ class Pathfinder:
 
 
 	def printNeighbours(self, node, neighbours):
+		a =1
 		# vecinos = "==>Vecinos de (" + str(node["x"]) + "," + str(node["y"]) + "):  "
 		# for i in range(len(neighbours)):
 		# 	vecinos = vecinos + "(" + str(neighbours[i]["x"]) + "," + str(neighbours[i]["y"]) + ")"
@@ -180,6 +183,7 @@ class Pathfinder:
 
 
 	def printResultPath(self, pathList):
+		a =1
 		# caminoResultante = "==>Camino Resultante: "
 		# for i in range(len(pathList)):
 		# 	caminoResultante = caminoResultante + "(" + str(pathList[i]["x"]) + "," + str(pathList[i]["y"]) + ")"

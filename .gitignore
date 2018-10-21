@@ -12,10 +12,9 @@ env-proyecto
 segundo-dron/
 # base properties
 # baseProperties.py
-properties.py
+# properties.py
 
 # types of files with data
-*.csv
 *.txt
 *.drone
 *.world

@@ -90,7 +90,7 @@ def run():
         f.write('NO TERMINE')
     drone1 = drone.drone(HOME)
     drone1.bebop.connect(10)
-    logStats = stats.stats(drone1, 1)
+    logStats = stats.stats(drone1, )
     stateMachine1 = stateMachine(HOME, INIT_POI_POSITION, FOREVER_ALONE, drone1, logStats)
 
     connection = threading.Thread(

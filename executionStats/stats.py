@@ -1,19 +1,30 @@
 from threading import Timer
-from utils import getStringMatrix, convertTupleToString
-from pyparrot.networking.connectionProperties import ACTIVATE_LOG
-from properties import OBSTACLES
+from utils import getStringMatrix, convertTupleToString, getMapCoverage
+from pyparrot.networking.connectionProperties import ACTIVATE_LOG, LOG_NAME
+from properties import OBSTACLES, ALGORITHM
 import time
+import sys
 import csv
 
 
 class stats:
-    def __init__(self, drone, executionId):
+    def __init__(self, drone):
         if ACTIVATE_LOG is not None and ACTIVATE_LOG is True:
             self.drone = drone
-            self.executionId = executionId
+            try:
+                self.executionId = sys.argv[1]
+            except:
+                self.executionId = 1
+            try:
+                self.instanceId = sys.argv[2]
+            except:
+                self.instanceId = 1
+            self.algorithm = ALGORITHM
             # self.logFile = open("log" + str(executionId) + ".txt", "w+")
-            self.csvLogFile = "log" + ".csv"
-            self.csvLogPoiFile = "logPOI" + ".csv"
+            self.csvLogFile = "log" + str(LOG_NAME) + ".csv"
+            self.csvLogPoiFile = "logPOI" + str(LOG_NAME) + ".csv"
+            self.csvLogMap = "logMap" + str(LOG_NAME) + str(self.executionId) + str(self.instanceId) + self.algorithm + ".csv"
+            self.logMapTimestamp = "logMapTimestamp" + str(LOG_NAME) + str(self.executionId) + str(self.instanceId) + self.algorithm + ".csv"
             self.timer = Timer(10, self.registerData)
             self.timer.start()
             self.iteration = 1
@@ -40,7 +51,7 @@ class stats:
             # self.logFile.write("\n Iteration: " + str(self.iteration) + "\n")
             # self.logFile.write(getStringMatrix(searchMap))
             # self.logFile.write("\n")
-            mapCoverage = self.getMapCoverage(searchMap)
+            mapCoverage = getMapCoverage(self.drone, 0, self.drone.mapa_ancho, 0, self.drone.mapa_largo)
             # self.logFile.write("Map Coverage: " + str(mapCoverage) + "\n")
             self.iteration += 1
             self.coverage.append(mapCoverage)
@@ -127,18 +138,18 @@ class stats:
                 # self.logFile.write("PoiCritico tiempoRespuesta peor caso: " + str(self.poiCriticoPeorCaso) + "\n")
                 # self.logFile.write("PoiVigilar tiempoRespuesta mejor caso: " + str(self.poiVigilarMejorCaso) + "\n")
                 # self.logFile.write("PoiCritico tiempoRespuesta mejor caso: " + str(self.poiCriticoMejorCaso) + "\n")
-                if self.executionId == 1:
-                    writer.writerow(["ID", "Total map coverage", "map coverage by time (10s)", "PoiVigilar cantidad pois activados", "PoiCritico cantidad pois activados", "PoiVigilar cantidad pois atendidos", "PoiCritico cantidad pois atendidos", "PoiVigilar tiempoRespuesta promedio", "PoiCritico tiempoRespuesta promedio", "PoiVigilar tiempoRespuesta peor caso", "PoiCritico tiempoRespuesta peor caso", "PoiVigilar tiempoRespuesta mejor caso", "PoiCritico tiempoRespuesta mejor caso"])
+                # if self.executionId == 1:
+                writer.writerow(["Ejecucion", "Instancia", "Algoritmo", "Total map coverage", "map coverage by time (10s)", "PoiVigilar cantidad pois activados", "PoiCritico cantidad pois activados", "PoiVigilar cantidad pois atendidos", "PoiCritico cantidad pois atendidos", "PoiVigilar tiempoRespuesta promedio", "PoiCritico tiempoRespuesta promedio", "PoiVigilar tiempoRespuesta peor caso", "PoiCritico tiempoRespuesta peor caso", "PoiVigilar tiempoRespuesta mejor caso", "PoiCritico tiempoRespuesta mejor caso"])
                 totalCoverage = self.coverage[-1]
-                print("#########" + str(self.coverage))
+                # print("#########" + str(self.coverage))
                 self.coverage.remove(totalCoverage)
-                writer.writerow([self.executionId, totalCoverage, self.coverage, self.poiVigilarTotalTimersActivados, self.poiCriticoTotalTimersActivados, self.cantPoiVigilar, self.cantPoiCritico, poiVigilarPromedio, poiCriticoPromedio, self.poiVigilarPeorCaso, self.poiCriticoPeorCaso, self.poiVigilarMejorCaso, self.poiCriticoMejorCaso])
-                with open(self.csvLogPoiFile, 'a', newline='') as csvfile:
-                    writerPoi = csv.writer(csvfile, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-                    if self.executionId == 1:
-                        writerPoi.writerow(["ID", "Poi position", "Poi Type", "Poi tiempos"])
+                writer.writerow([self.executionId, self.instanceId, self.algorithm, totalCoverage, self.coverage, self.poiVigilarTotalTimersActivados, self.poiCriticoTotalTimersActivados, self.cantPoiVigilar, self.cantPoiCritico, poiVigilarPromedio, poiCriticoPromedio, self.poiVigilarPeorCaso, self.poiCriticoPeorCaso, self.poiVigilarMejorCaso, self.poiCriticoMejorCaso])
+                with open(self.csvLogPoiFile, 'a', newline='') as csvfile2:
+                    writerPoi = csv.writer(csvfile2, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+                    # if self.executionId == 1:
+                    writerPoi.writerow(["Ejecucion", "Instancia", "Algoritmo", "Poi position", "Poi Type", "Poi tiempos"])
                     for poiKey in self.poiVigilarTiempoAtencion:
-                        writerPoi.writerow([self.executionId, poiKey, "Vigilar"] + self.poiVigilarTiempoAtencion[poiKey])
+                        writerPoi.writerow([self.executionId, self.instanceId, self.algorithm, poiKey, "Vigilar"] + self.poiVigilarTiempoAtencion[poiKey])
                         # self.logFile.write("PoiVigilar " + poiKey + " tiempos respuesta: " + str(self.poiVigilarTiempoAtencion[poiKey]) + "\n")
                         # if self.poiVigilarTiempoAtencion:
                         #     total = 0
@@ -146,11 +157,33 @@ class stats:
                         #     promedio = total / len(self.poiVigilarTiempoAtencion)
                         #     self.logFile.write("PoiVigilar: " + poiKey + " tiempo promedio: " + str(promedio) + "\n")
                     for poiKey in self.poiCriticoTiempoAtencion:
-                        writerPoi.writerow([self.executionId, poiKey, "Critico"] + self.poiCriticoTiempoAtencion[poiKey])
+                        writerPoi.writerow([self.executionId, self.instanceId, self.algorithm, poiKey, "Critico"] + self.poiCriticoTiempoAtencion[poiKey])
                         # self.logFile.write("PoiCritico " + poiKey + " tiempos respuesta: " + str(self.poiCriticoTiempoAtencion[poiKey]) + "\n")
                         # if self.poiCriticoTiempoAtencion:
                         #     total = 0
                         #     total += [i for i in self.poiCriticoTiempoAtencion]
                         #     promedio = total / len(self.poiCriticoTiempoAtencion)
                         #     self.logFile.write("PoiCritico: " + poiKey + " tiempo promedio: " + str(promedio) + "\n")
+                with open(self.csvLogMap, 'a', newline='') as csvfile3:
+                    writerLogMap = csv.writer(csvfile3, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+                    for j in range(int(self.drone.mapa_largo)):
+                        row = ""
+                        for i in range(int(self.drone.mapa_ancho)):
+                            if ((i, j) in OBSTACLES):
+                                row += "X"
+                            else:
+                                row += str(self.drone.logMap[i][j])
+                        writerLogMap.writerow(row)
+                currentTime = time.time()
+                with open(self.logMapTimestamp, 'a', newline='') as csvfile4:
+                    writerLogTimestampMap = csv.writer(csvfile4, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+                    # print(OBSTACLES)
+                    for j in range(0, int(self.drone.mapa_largo)):
+                        row = ""
+                        for i in range(0, int(self.drone.mapa_ancho)):
+                            if (self.drone.pointIsObstacule(i, j)):
+                                row += "X"
+                            else:
+                                row += str(currentTime - self.drone.logMapTimestamp[i][j])[:1]
+                        writerLogTimestampMap.writerow(row)
             # self.logFile.close()

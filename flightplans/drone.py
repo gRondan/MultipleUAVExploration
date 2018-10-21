@@ -34,17 +34,19 @@ class drone:
         self.pathToFollow = None
         self.destinationZone = None
         self.countIter = 0
+        self.logMapTimestamp = None
+        self.logMap = None
 
     def initialize(self, ip, port):
         self.initSearchMapWithObstacles()
+        init_time = time.time()
+        self.init_time = init_time
         if properties.ALGORITHM == SH_ORIGINAL:
             self.search_map[self.home[0]][self.home[1]] = 1
-        elif properties.ALGORITHM == SH_TIMESTAMP or ALGORITHM == SH_NO_GREEDY_TIMESTAMP:
-            init_time = time.time()
-            self.init_time = init_time
+        elif properties.ALGORITHM == SH_TIMESTAMP or ALGORITHM == SH_NO_GREEDY_TIMESTAMP or ALGORITHM == RANDOM:
             self.search_map = [[init_time for j in range(int(self.mapa_largo))]for i in range(int(self.mapa_ancho))]
-        elif properties.ALGORITHM == RANDOM:
-            self.search_map[self.home[0]][self.home[1]] = 1
+        # elif properties.ALGORITHM == RANDOM:
+        #     self.search_map[self.home[0]][self.home[1]] = 1
         self.ip = ip
         self.port = port
         # success = self.bebop.connect(10)
@@ -53,6 +55,8 @@ class drone:
         self.bebop.ask_for_state_update()
         if properties.STREAMING_MODE_ON:
             self.initializeStreaming()
+        self.logMap = [[0 for j in range(int(self.mapa_largo))]for i in range(int(self.mapa_ancho))]
+        self.logMapTimestamp = [[init_time for j in range(int(self.mapa_largo))]for i in range(int(self.mapa_ancho))]
 
     def initSearchMapWithObstacles(self):
         for obstacle in self.obstaculos:
@@ -401,10 +405,10 @@ class drone:
         self.mutex_search_map.acquire()
         if properties.ALGORITHM == SH_ORIGINAL or properties.ALGORITHM == SH_NO_GREEDY:
             self.search_map[tupla[0]][tupla[1]] += 1
-        elif properties.ALGORITHM == SH_TIMESTAMP or ALGORITHM == SH_NO_GREEDY_TIMESTAMP:
+        elif properties.ALGORITHM == SH_TIMESTAMP or ALGORITHM == SH_NO_GREEDY_TIMESTAMP or ALGORITHM == RANDOM:
             self.search_map[tupla[0]][tupla[1]] = time.time()
-        elif properties.ALGORITHM == RANDOM:
-            self.search_map[tupla[0]][tupla[1]] += 1
+        self.logMap[tupla[0]][tupla[1]] += 1
+        self.logMapTimestamp[tupla[0]][tupla[1]] = time.time()
         self.mutex_search_map.release()
 
     def getSearchMap(self):

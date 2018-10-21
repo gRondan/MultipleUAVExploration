@@ -1,12 +1,13 @@
 import math
 import time
 from properties import OBSTACLES, TIME_COVERAGE_REFRESH, ALGORITHM
-from enums import SH_NO_GREEDY_TIMESTAMP, SH_TIMESTAMP
+from enums import SH_NO_GREEDY_TIMESTAMP, SH_TIMESTAMP, RANDOM
 # CONSTANTS
 ipPortSplitter = ":"
 
 
 def printMatrix(matrix):
+    a =1
     # print('****** PRINT MAPA ******')
     # print(getStringMatrix(matrix))
     # print('************************')
@@ -129,7 +130,7 @@ def parseIpPort(ipPort):
 
 def getMapCoverage(drone, init_largo, end_largo, init_ancho, end_ancho):
     totalMap = (end_largo - init_largo) * (end_ancho - init_ancho)
-    isTimer = ALGORITHM == SH_TIMESTAMP or ALGORITHM == SH_NO_GREEDY_TIMESTAMP
+    isTimer = ALGORITHM == SH_TIMESTAMP or ALGORITHM == SH_NO_GREEDY_TIMESTAMP or ALGORITHM == RANDOM
     totalMap -= len(OBSTACLES)
     contSinExplorar = 0
     currentTime = time.time()
