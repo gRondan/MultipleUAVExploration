@@ -451,11 +451,12 @@ class drone:
             return NORMAL
 
     def goHome(self):
-        pathfinder = Pathfinder(self.current_position, self.home)
-        pathToFollow = pathfinder.findPath()
-        pathfinder.printFinalMap()
-        for nextPosition in pathfinder.parsePathToCoordinates(pathToFollow):
-            self.move(nextPosition)
+        if self.current_position != self.home:
+            pathfinder = Pathfinder(self.current_position, self.home)
+            pathToFollow = pathfinder.findPath()
+            pathfinder.printFinalMap()
+            for nextPosition in pathfinder.parsePathToCoordinates(pathToFollow):
+                self.move(nextPosition)
 
     def getClosestCoordinateToTarget(self, target, pos):
         res = self.current_position[pos]
