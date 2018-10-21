@@ -15,6 +15,7 @@ segundo-dron/
 # properties.py
 
 # types of files with data
+*.csv
 *.txt
 *.drone
 *.world
