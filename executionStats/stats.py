@@ -139,7 +139,7 @@ class stats:
                 # self.logFile.write("PoiVigilar tiempoRespuesta mejor caso: " + str(self.poiVigilarMejorCaso) + "\n")
                 # self.logFile.write("PoiCritico tiempoRespuesta mejor caso: " + str(self.poiCriticoMejorCaso) + "\n")
                 # if self.executionId == 1:
-                writer.writerow(["Ejecucion", "Instancia", "Algoritmo", "Total map coverage", "map coverage by time (10s)", "PoiVigilar cantidad pois activados", "PoiCritico cantidad pois activados", "PoiVigilar cantidad pois atendidos", "PoiCritico cantidad pois atendidos", "PoiVigilar tiempoRespuesta promedio", "PoiCritico tiempoRespuesta promedio", "PoiVigilar tiempoRespuesta peor caso", "PoiCritico tiempoRespuesta peor caso", "PoiVigilar tiempoRespuesta mejor caso", "PoiCritico tiempoRespuesta mejor caso"])
+                # writer.writerow(["Ejecucion", "Instancia", "Algoritmo", "Total map coverage", "map coverage by time (10s)", "PoiVigilar cantidad pois activados", "PoiCritico cantidad pois activados", "PoiVigilar cantidad pois atendidos", "PoiCritico cantidad pois atendidos", "PoiVigilar tiempoRespuesta promedio", "PoiCritico tiempoRespuesta promedio", "PoiVigilar tiempoRespuesta peor caso", "PoiCritico tiempoRespuesta peor caso", "PoiVigilar tiempoRespuesta mejor caso", "PoiCritico tiempoRespuesta mejor caso"])
                 totalCoverage = self.coverage[-1]
                 # print("#########" + str(self.coverage))
                 self.coverage.remove(totalCoverage)
@@ -147,7 +147,7 @@ class stats:
                 with open(self.csvLogPoiFile, 'a', newline='') as csvfile2:
                     writerPoi = csv.writer(csvfile2, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
                     # if self.executionId == 1:
-                    writerPoi.writerow(["Ejecucion", "Instancia", "Algoritmo", "Poi position", "Poi Type", "Poi tiempos"])
+                    # writerPoi.writerow(["Ejecucion", "Instancia", "Algoritmo", "Poi position", "Poi Type", "Poi tiempos"])
                     for poiKey in self.poiVigilarTiempoAtencion:
                         writerPoi.writerow([self.executionId, self.instanceId, self.algorithm, poiKey, "Vigilar"] + self.poiVigilarTiempoAtencion[poiKey])
                         # self.logFile.write("PoiVigilar " + poiKey + " tiempos respuesta: " + str(self.poiVigilarTiempoAtencion[poiKey]) + "\n")

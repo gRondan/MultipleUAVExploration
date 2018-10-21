@@ -7,10 +7,10 @@ algoritmos = [SH_TIMESTAMP, RANDOM, SH_NO_GREEDY_TIMESTAMP]
 ejecuciones = 1
 # las instancias y los algoritmos arrancan en el 0 y van agarran el intervalo [min, max)
 instancia_min = 1
-instancia_max = 4
-algoritmo_min = 1
-algoritmo_max = 2
-ejecucion_inicial = 1
+instancia_max = 13
+algoritmo_min = 0
+algoritmo_max = 1
+ejecucion_inicial = 0
 
 print("ALGORITMOS: ", algoritmos)
 
