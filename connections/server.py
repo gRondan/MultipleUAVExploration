@@ -66,5 +66,4 @@ class server:
             self.mutex.acquire()
             end = self.endServer
             self.mutex.release()
-
-server.close()
+        server.close()
