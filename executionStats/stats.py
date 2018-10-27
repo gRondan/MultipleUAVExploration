@@ -21,10 +21,10 @@ class stats:
                 self.instanceId = 1
             self.algorithm = ALGORITHM
             # self.logFile = open("log" + str(executionId) + ".txt", "w+")
-            self.csvLogFile = "log" + str(LOG_NAME) + ".csv"
-            self.csvLogPoiFile = "logPOI" + str(LOG_NAME) + ".csv"
-            self.csvLogMap = "logMap" + str(LOG_NAME) + str(self.executionId) + str(self.instanceId) + self.algorithm + ".csv"
-            self.logMapTimestamp = "logMapTimestamp" + str(LOG_NAME) + str(self.executionId) + str(self.instanceId) + self.algorithm + ".csv"
+            self.csvLogFile = "log/log" + str(LOG_NAME) + ".csv"
+            self.csvLogPoiFile = "log/logPOI" + str(LOG_NAME) + ".csv"
+            self.csvLogMap = "log/logMap" + str(LOG_NAME) + str(self.executionId) + str(self.instanceId) + self.algorithm + ".csv"
+            self.logMapTimestamp = "log/logMapTimestamp" + str(LOG_NAME) + str(self.executionId) + str(self.instanceId) + self.algorithm + ".csv"
             self.timer = Timer(10, self.registerData)
             self.timer.start()
             self.iteration = 1
@@ -165,25 +165,26 @@ class stats:
                         #     promedio = total / len(self.poiCriticoTiempoAtencion)
                         #     self.logFile.write("PoiCritico: " + poiKey + " tiempo promedio: " + str(promedio) + "\n")
                 with open(self.csvLogMap, 'a', newline='') as csvfile3:
-                    writerLogMap = csv.writer(csvfile3, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+                    writerLogMap = csv.writer(csvfile3, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
                     for j in range(int(self.drone.mapa_largo)):
                         row = ""
                         for i in range(int(self.drone.mapa_ancho)):
                             if ((i, j) in OBSTACLES):
-                                row += "X"
+                                row += "X;"
                             else:
-                                row += str(self.drone.logMap[i][j])
-                        writerLogMap.writerow(row)
+                                row += str(self.drone.logMap[i][j]) + ";"
+                        writerLogMap.writerow([row])
                 currentTime = time.time()
                 with open(self.logMapTimestamp, 'a', newline='') as csvfile4:
-                    writerLogTimestampMap = csv.writer(csvfile4, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+                    writerLogTimestampMap = csv.writer(csvfile4, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
                     # print(OBSTACLES)
                     for j in range(0, int(self.drone.mapa_largo)):
                         row = ""
                         for i in range(0, int(self.drone.mapa_ancho)):
                             if (self.drone.pointIsObstacule(i, j)):
-                                row += "X"
+                                row += "X;"
                             else:
-                                row += str(currentTime - self.drone.logMapTimestamp[i][j])[:1]
-                        writerLogTimestampMap.writerow(row)
+                                row += str(int(round(currentTime - self.drone.logMapTimestamp[i][j]))) + ";"
+                        print(row)
+                        writerLogTimestampMap.writerow([row])
             # self.logFile.close()
