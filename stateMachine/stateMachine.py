@@ -35,6 +35,7 @@ class stateMachine():
         self.poisVigilar = []
         self.isAlone = isAlone
         self.poiVigilarTimeoutDict = {}
+        self.poisVigilarCriticoTimeoutDict = {}
         self.logStats = logStats
 
     def execute(self):
@@ -115,7 +116,7 @@ class stateMachine():
                 self.state = desplazarseSinConexion.desplazarseSinConexion(self.bebop, self.dataBuffer, self.previousState, self.messages[self.currentState])
 
             elif self.currentState == FIN:
-                self.state = fin.fin(self.bebop, self.dataBuffer, self.previousState, self.client, self.logStats, self.messages[self.currentState])
+                self.state = fin.fin(self.bebop, self.dataBuffer, self.previousState, self.client, self.logStats, self.poiVigilarTimeoutDict, self.poisVigilarCriticoTimeoutDict, self.messages[self.currentState])
                 self.end = True
 
             self.processState()
@@ -173,6 +174,7 @@ class stateMachine():
         self.poisVigilar.append(poi)
         poiCriticoTimer = Timer(POI_CRITICO_TIMERS[POI_POSITIONS.index(poi)], self.poiCriticoTimeout, (poi,))
         poiCriticoTimer.start()
+        self.poisVigilarCriticoTimeoutDict[poi] = poiCriticoTimer
         self.logStats.poiVigilarTimeout(poi)
 
     def poiCriticoTimeout(self, poi):

@@ -4,13 +4,13 @@ import time
 from enums import SH_TIMESTAMP, RANDOM, SH_NO_GREEDY_TIMESTAMP
 
 algoritmos = [SH_TIMESTAMP, RANDOM, SH_NO_GREEDY_TIMESTAMP]
-ejecuciones = 1
+ejecuciones = 2
 # las instancias y los algoritmos arrancan en el 0 y van agarran el intervalo [min, max)
 instancia_min = 1
-instancia_max = 4
+instancia_max = 3
 algoritmo_min = 1
 algoritmo_max = 2
-ejecucion_inicial = 1
+ejecucion_inicial = 0
 
 print("ALGORITMOS: ", algoritmos)
 
