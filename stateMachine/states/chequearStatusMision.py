@@ -22,7 +22,7 @@ class chequearStatusMision():
     def execute(self):
         result = []
         for key in self.poisVigilar:
-            if convertTupleToString(key) in self.assignedPOIs andself.client.check_connection(self.assignedPOIs[convertTupleToString(key)]["ip"]) == 0:
+            if convertTupleToString(key) in self.assignedPOIs and self.client.check_connection(self.assignedPOIs[convertTupleToString(key)]["ip"]) == 0:
                 self.client.send_message(createMessage(ASIGNAR_POI, MISSION_OK, key))
                 self.poisVigilar.remove(key)
                 timer2 = threading.Timer(TIME_BETWEEN_POI_PING, self.checkMissionStatus, (key,))
