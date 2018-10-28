@@ -185,6 +185,6 @@ class stats:
                                 row += "X;"
                             else:
                                 row += str(int(round(currentTime - self.drone.logMapTimestamp[i][j]))) + ";"
-                        print(row)
                         writerLogTimestampMap.writerow([row])
             # self.logFile.close()
+            print("END LOG")

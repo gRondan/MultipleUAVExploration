@@ -351,7 +351,10 @@ class drone:
         regionCoverage.append(getMapCoverage(self, self.mapa_ancho / 2, self.mapa_ancho, 0, self.mapa_largo / 2))
         regionCoverage.append(getMapCoverage(self, 0, self.mapa_ancho / 2, self.mapa_largo / 2, self.mapa_largo))
         regionCoverage.append(getMapCoverage(self, self.mapa_ancho / 2, self.mapa_ancho, self.mapa_largo / 2, self.mapa_largo))
-        return regionCoverage.index(min(regionCoverage)) + 1
+        selectedZone = regionCoverage.index(min(regionCoverage)) + 1
+        if selectedZone == self.getCurrentRegion():
+            return None
+        return selectedZone
 
     def getZonesCoverage(self):
         regionCoverage = []
